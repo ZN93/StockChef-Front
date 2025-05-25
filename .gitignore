@@ -1,0 +1,22 @@
+# Node / Java / IDE / OS
+
+# Node
+node_modules/
+dist/
+build/
+.env
+.env.*
+
+# Java / Spring
+target/
+*.jar
+*.class
+*.log
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
