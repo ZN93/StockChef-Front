@@ -1,4 +1,4 @@
-import { api } from "../api/client.ts";
+import { api} from "../api/client.ts";
 
 export type LoginPayload = {
     email: string;
@@ -13,8 +13,7 @@ export type LoginResponse = {
     expiresIn: number;
 };
 
-export async function loginApi(credentials: { email: string; password: string }) {
-    const { data } = await api.post<LoginResponse>("/auth/login", credentials);
-    return data;
+export async function loginApi(payload: LoginPayload): Promise<LoginResponse> {
+    const resp = await api.post<LoginResponse>("/auth/login", payload);
+    return resp.data;
 }
-

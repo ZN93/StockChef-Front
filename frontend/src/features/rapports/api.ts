@@ -21,10 +21,12 @@ export function useRapports(params: { from: string; to: string }) {
         queryKey: ["rapports", params],
         queryFn: async () => {
             const { from, to } = params;
-            const url = `/api/rapports?from=${from}&to=${to}`;
-            const res = await api.get(url);
-            return res.data;
+            const { data } = await api.get<RapportResponse>("/rapports", {
+                params: { from, to },
+            });
+            return data;
         },
         enabled: Boolean(params.from && params.to),
     });
 }
+

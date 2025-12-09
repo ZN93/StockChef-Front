@@ -1,17 +1,31 @@
-import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
-import { api } from "../../api/client.ts";
+import {
+    useQuery,
+    useMutation,
+    useQueryClient,
+    keepPreviousData,
+} from "@tanstack/react-query";
+import { api } from "../../api/client";
 import type { Page, Produit, NewProduit } from "./types";
-import { client } from "./client";
 
+export type UseProduitsParams = {
+    page: number;
+    size: number;
+    search?: string;
+};
 
-export function useProduits(page: number, search?: string) {
+export function useProduits({ page, size, search }: UseProduitsParams) {
     return useQuery({
-        queryKey: ["produits", { page, search }],
+        queryKey: ["produits", { page, size, search }],
         queryFn: async () => {
-            console.log("[RQ] GET /produits ", { baseURL: api.defaults.baseURL, page, size: 20, search });
+            console.log("[RQ] GET /produits ", {
+                baseURL: api.defaults.baseURL,
+                page,
+                size,
+                search,
+            });
 
             const resp = await api.get<Page<Produit>>("/produits", {
-                params: { page, size: 20, search },
+                params: { page, size, search },
             });
             return resp.data;
         },
@@ -19,31 +33,29 @@ export function useProduits(page: number, search?: string) {
     });
 }
 
-
 export function useCreateProduit() {
     const qc = useQueryClient();
     return useMutation({
-        mutationFn: async (payload: NewProduit) => (await api.post("/produits", payload)).data as Produit,
+        mutationFn: async (payload: NewProduit) =>
+            (await api.post("/produits", payload)).data as Produit,
         onSuccess: () => qc.invalidateQueries({ queryKey: ["produits"] }),
     });
 }
+
+/* Partie Consommer un produit */
+
 export type ConsommerPayload = {
     id: number;
     quantite: number;
 };
 
-export function consommerProduit({ id, quantite }: ConsommerPayload) {
-    return client(`/api/produits/${id}/stock`, {
-        method: "PATCH",
-        body: JSON.stringify({ quantite }),
-    });
-}
-
 export function useConsommerProduit() {
     const qc = useQueryClient();
 
     return useMutation({
-        mutationFn: consommerProduit,
+        mutationFn: async ({ id, quantite }: ConsommerPayload) => {
+            await api.patch(`/produits/${id}/stock`, { quantite });
+        },
         onSuccess: () => {
             qc.invalidateQueries({
                 predicate: (q) =>
@@ -52,3 +64,4 @@ export function useConsommerProduit() {
         },
     });
 }
+
