@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { api } from "../../api/client.ts";
 
 
 export type RapportItem = {
@@ -22,7 +22,7 @@ export function useRapports(params: { from: string; to: string }) {
         queryFn: async () => {
             const { from, to } = params;
             const url = `/api/rapports?from=${from}&to=${to}`;
-            const res = await axios.get(url);
+            const res = await api.get(url);
             return res.data;
         },
         enabled: Boolean(params.from && params.to),

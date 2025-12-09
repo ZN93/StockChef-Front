@@ -1,25 +1,24 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
-import axios from "axios";
+import { api } from "../../api/client.ts";
 import type { Page, Produit, NewProduit } from "./types";
 import { client } from "./client";
 
-const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "/api", // ← toujours /api en dev
-});
 
-export function useProduits(params: { search?: string; page?: number; size?: number } = {}) {
+export function useProduits(page: number, search?: string) {
     return useQuery({
-        queryKey: ["produits", params],
-        queryFn: async (): Promise<Page<Produit>> => {
-            console.log("[RQ] GET /produits", { baseURL: api.defaults.baseURL, ...params }); // 👀 log
-            const { data } = await api.get("/produits", { params }); // ← appelle /api/produits
-            return data;
+        queryKey: ["produits", { page, search }],
+        queryFn: async () => {
+            console.log("[RQ] GET /produits ", { baseURL: api.defaults.baseURL, page, size: 20, search });
+
+            const resp = await api.get<Page<Produit>>("/produits", {
+                params: { page, size: 20, search },
+            });
+            return resp.data;
         },
         placeholderData: keepPreviousData,
-        staleTime: 30_000,
-        refetchOnWindowFocus: false,
     });
 }
+
 
 export function useCreateProduit() {
     const qc = useQueryClient();

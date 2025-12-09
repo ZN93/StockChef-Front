@@ -26,43 +26,54 @@ export default function AppLayout() {
                             <NavLink
                                 to="/app"
                                 end
-                                className={({ isActive }) =>
+                                className={({isActive}) =>
                                     `${linkBase} ${isActive ? linkActive : linkInactive}`
                                 }
                             >
                                 Tableau de bord
                             </NavLink>
+
+                            {/* Tout le monde voit Produits */}
                             <NavLink
                                 to="/app/produits"
-                                className={({ isActive }) =>
+                                className={({isActive}) =>
                                     `${linkBase} ${isActive ? linkActive : linkInactive}`
                                 }
                             >
                                 Produits
                             </NavLink>
+
                             <NavLink
                                 to="/app/menus"
-                                className={({ isActive }) =>
+                                className={({isActive}) =>
                                     `${linkBase} ${isActive ? linkActive : linkInactive}`
                                 }
                             >
                                 Menus
                             </NavLink>
+
+                            {/* Menus + Rapports réservés ADMIN */}
+                            {hasRole("ADMIN") && (
+                                <>
+                                    <NavLink
+                                        to="/app/rapports"
+                                        className={({isActive}) =>
+                                            `${linkBase} ${isActive ? linkActive : linkInactive}`
+                                        }
+                                    >
+                                        Rapports
+                                    </NavLink>
+                                </>
+                            )}
+
+                            {/* Alertes pour tout le monde */}
                             <NavLink
                                 to="/app/alertes"
-                                className={({ isActive }) =>
+                                className={({isActive}) =>
                                     `${linkBase} ${isActive ? linkActive : linkInactive}`
                                 }
                             >
                                 Alertes
-                            </NavLink>
-                            <NavLink
-                                to="/app/rapports"
-                                className={({ isActive }) =>
-                                    `${linkBase} ${isActive ? linkActive : linkInactive}`
-                                }
-                            >
-                                Rapports
                             </NavLink>
                         </div>
                     </nav>
@@ -73,7 +84,8 @@ export default function AppLayout() {
                             <div className="font-medium">
                                 {auth?.role ?? "?"}
                                 {hasRole("ADMIN") && (
-                                    <span className="ml-1 inline-flex items-center rounded-full bg-gray-900/5 px-2 py-0.5 text-[10px] uppercase tracking-wide text-gray-700">
+                                    <span
+                                        className="ml-1 inline-flex items-center rounded-full bg-gray-900/5 px-2 py-0.5 text-[10px] uppercase tracking-wide text-gray-700">
                     Admin
                   </span>
                                 )}
@@ -96,7 +108,7 @@ export default function AppLayout() {
             {/* CONTENU PRINCIPAL */}
             <main className="flex-1">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <Outlet />
+                    <Outlet/>
                 </div>
             </main>
         </div>

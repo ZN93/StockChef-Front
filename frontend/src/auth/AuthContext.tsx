@@ -1,32 +1,92 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
+import type { ReactNode } from "react";
+import { loginApi } from "./api";
+import type { LoginResponse } from "./api";
 
-type Role = "USER" | "ADMIN";
-type AuthState = { role: Role | null; token?: string | null };
-type AuthContext = {
-    auth: AuthState;
-    login: (role: Role) => void;
-    logout: () => void;
-    hasRole: (...roles: Role[]) => boolean;
+type SimpleRole = "ADMIN" | "USER" | "DEVELOPER" | "CHEF" | "EMPLOYEE";
+
+type AuthState = {
+    token: string | null;
+    email: string | null;
+    fullName: string | null;
+    role: SimpleRole | null;
 };
 
-const Ctx = createContext<AuthContext | null>(null);
+type AuthContextValue = {
+    auth: AuthState;
+    login: (email: string, password: string) => Promise<void>;
+    logout: () => void;
+    hasRole: (...roles: SimpleRole[]) => boolean;
+};
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+const STORAGE_KEY = "stockchef_auth";
+
+function mapBackendRole(role: string): SimpleRole {
+    if (role === "ROLE_ADMIN") return "ADMIN";
+    if (role === "ROLE_DEVELOPER") return "DEVELOPER";
+    if (role === "ROLE_CHEF") return "CHEF";
+    if (role === "ROLE_EMPLOYEE") return "EMPLOYEE";
+    return "USER";
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
     const [auth, setAuth] = useState<AuthState>(() => {
-        const raw = localStorage.getItem("auth");
-        return raw ? JSON.parse(raw) : { role: null, token: null };
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return { token: null, email: null, fullName: null, role: null };
+        try {
+            return JSON.parse(raw) as AuthState;
+        } catch {
+            return { token: null, email: null, fullName: null, role: null };
+        }
     });
 
-    useEffect(() => localStorage.setItem("auth", JSON.stringify(auth)), [auth]);
+    useEffect(() => {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(auth));
+    }, [auth]);
 
-    const login = (role: Role) => setAuth({ role, token: "fake" });
-    const logout = () => setAuth({ role: null, token: null });
-    const hasRole = (...roles: Role[]) => !!auth.role && roles.includes(auth.role);
+    const login = useCallback(async (email: string, password: string) => {
+        const data: LoginResponse = await loginApi({ email, password });
 
-    return <Ctx.Provider value={{ auth, login, logout, hasRole }}>{children}</Ctx.Provider>;
+        const mappedRole = mapBackendRole(data.role);
+
+        setAuth({
+            token: data.token,
+            email: data.email,
+            fullName: data.fullName,
+            role: mappedRole,
+        });
+    }, []);
+
+    const logout = useCallback(() => {
+        setAuth({ token: null, email: null, fullName: null, role: null });
+        localStorage.removeItem(STORAGE_KEY);
+    }, []);
+
+    const hasRole = useCallback(
+        (...roles: SimpleRole[]) => {
+            if (!auth.role) return false;
+            return roles.includes(auth.role);
+        },
+        [auth.role]
+    );
+
+    return (
+        <AuthContext.Provider value={{ auth, login, logout, hasRole }}>
+            {children}
+        </AuthContext.Provider>
+    );
 }
+
 export function useAuth() {
-    const ctx = useContext(Ctx);
-    if (!ctx) throw new Error("AuthProvider missing");
+    const ctx = useContext(AuthContext);
+    if (!ctx) throw new Error("useAuth must be used within AuthProvider");
     return ctx;
 }

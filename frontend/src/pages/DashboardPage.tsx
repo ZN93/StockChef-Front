@@ -34,14 +34,13 @@ const SEUIL_BUDGET = 4.5;
 const JOURS_PEREMPTION = 3;
 
 export default function DashboardPage() {
-    // valeurs démo – plus tard tu pourras les alimenter avec /rapports
     const coutMoyen = 3.85;
     const nbMenusDepassement = 1;
     const nbPerimes = 1;
     const nbProches = 2;
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <KPI
                 title="Coût moyen (mois)"
                 value={formatCurrency(coutMoyen)}
@@ -66,45 +65,49 @@ export default function DashboardPage() {
                 subtitle="À arbitrer"
             />
 
-            <SectionCard
-                title="Derniers produits entrés"
-                actions={
-                    <button className="px-3 py-1.5 rounded-full border text-xs">
-                        Voir tout
-                    </button>
-                }
-            >
-                <table className="w-full text-sm">
-                    <thead className="text-left text-gray-500">
-                    <tr>
-                        <th className="py-2">Produit</th>
-                        <th>Quantité</th>
-                        <th>Prix u.</th>
-                        <th>Date d'entrée</th>
-                        <th>Péremption</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {mockProduits.map((p) => (
-                        <tr key={p.id} className="border-t">
-                            <td className="py-2 font-medium">{p.nom}</td>
-                            <td>
-                                {p.quantite} {p.unite}
-                            </td>
-                            <td>{formatCurrency(p.prix)}</td>
-                            <td>{p.entree}</td>
-                            <td>{p.peremption}</td>
+            <div className="md:col-span-2">
+                <SectionCard
+                    title="Derniers produits entrés"
+                    actions={
+                        <button className="px-3 py-1.5 rounded-full border text-xs">
+                            Voir tout
+                        </button>
+                    }
+                >
+                    <table className="w-full text-sm">
+                        <thead className="text-left text-gray-500">
+                        <tr>
+                            <th className="py-2">Produit</th>
+                            <th>Quantité</th>
+                            <th>Prix u.</th>
+                            <th>Date d'entrée</th>
+                            <th>Péremption</th>
                         </tr>
-                    ))}
-                    </tbody>
-                </table>
-            </SectionCard>
+                        </thead>
+                        <tbody>
+                        {mockProduits.map((p) => (
+                            <tr key={p.id} className="border-t">
+                                <td className="py-2 font-medium">{p.nom}</td>
+                                <td>
+                                    {p.quantite} {p.unite}
+                                </td>
+                                <td>{formatCurrency(p.prix)}</td>
+                                <td>{p.entree}</td>
+                                <td>{p.peremption}</td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </SectionCard>
+            </div>
 
-            <SectionCard title="Évolution du coût moyen (mock)">
-                <div className="h-48 grid place-items-center text-gray-400">
-                    [Graphique placeholder]
-                </div>
-            </SectionCard>
+            <div className="md:col-span-2">
+                <SectionCard title="Évolution du coût moyen (mock)">
+                    <div className="h-48 grid place-items-center text-gray-400">
+                        [Graphique placeholder]
+                    </div>
+                </SectionCard>
+            </div>
         </div>
     );
 }

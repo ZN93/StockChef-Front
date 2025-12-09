@@ -1,8 +1,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
-import axios from "axios";
+import { api } from "../../api/client.ts";
 import type { Menu, NewMenu } from "./types";
 
-const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || "/api" });
 
 type Page<T> = { content: T[]; page: number; size: number; totalElements: number };
 

@@ -9,7 +9,6 @@ import {
 
 import AppRoutes from "./AppRoutes";
 
-// 1. Création du client React Query
 const queryClient = new QueryClient({
     defaultOptions: {
         queries: {
@@ -19,25 +18,8 @@ const queryClient = new QueryClient({
     },
 });
 
-async function enableMocks() {
-    if (import.meta.env.DEV) {
-        const { worker } = await import("./mocks/browser");
-        await worker.start({
-            serviceWorker: {
-                url: "/mockServiceWorker.js",
-            },
-            onUnhandledRequest: "warn",
-        });
-        console.log("[MSW] ready before render");
-    }
-}
-
 async function bootstrap() {
-    await enableMocks();
-
-    ReactDOM.createRoot(
-        document.getElementById("root") as HTMLElement
-    ).render(
+     ReactDOM.createRoot(document.getElementById("root")!).render(
         <React.StrictMode>
             <QueryClientProvider client={queryClient}>
                 <AppRoutes />
@@ -47,3 +29,4 @@ async function bootstrap() {
 }
 
 bootstrap();
+
