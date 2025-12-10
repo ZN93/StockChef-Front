@@ -1,11 +1,5 @@
 import type { ReactNode } from "react";
 
-export const formatCurrency = (n: number | undefined | null) =>
-    new Intl.NumberFormat("fr-FR", {
-        style: "currency",
-        currency: "EUR",
-    }).format(n ?? 0);
-
 type ChipProps = {
     children: ReactNode;
     type?: "default" | "info" | "warn" | "danger" | "success";

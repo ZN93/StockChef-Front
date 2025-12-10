@@ -7,9 +7,10 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://localhost:8090", // ton backend Spring
+        target: "https://stockchef-back-production.up.railway.app", // Backend en Railway
         changeOrigin: true,
-        secure: false,
+        secure: true,
+        rewrite: (path) => path, // Mantener el path como está
       },
     },
   },

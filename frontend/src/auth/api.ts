@@ -1,4 +1,4 @@
-import { api} from "../api/client.ts";
+import { authApi } from "../api/client";
 
 export type LoginPayload = {
     email: string;
@@ -14,6 +14,6 @@ export type LoginResponse = {
 };
 
 export async function loginApi(payload: LoginPayload): Promise<LoginResponse> {
-    const resp = await api.post<LoginResponse>("/auth/login", payload);
+    const resp = await authApi.post<LoginResponse>("/auth/login", payload);
     return resp.data;
 }

@@ -1,4 +1,5 @@
-import { SectionCard, KPI, formatCurrency } from "../ui/kit";
+import { SectionCard, KPI } from "../ui/kit";
+import { formatCurrency } from "../utils/currency";
 
 const mockProduits = [
     {

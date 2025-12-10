@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useProduits } from "./api";
+import { useProduitsReal } from "./api-real";
 import { computeStatus } from "./status";
 import { useDebounce } from "./useDebounce";
 import ConsommerProduitModal from "./ConsommerProduitModal";
@@ -8,14 +8,23 @@ import type { Produit } from "./types";
 export default function ProduitsList() {
     const [query, setQuery] = useState("");
     const debounced = useDebounce(query, 350);
+    
+    // Usar backend real - obtiene todos los productos
+    const { data: allProduits, isLoading, isError, isFetching } = useProduitsReal();
+    
+    // Filtrar en frontend por búsqueda
+    const filteredProduits = allProduits?.filter(p => 
+        !debounced || p.nom.toLowerCase().includes(debounced.toLowerCase())
+    ) || [];
+    
+    // Simular paginación frontend
     const [page, setPage] = useState(0);
     const size = 20;
-
-    const { data, isLoading, isError, isFetching } = useProduits({
-        page,
-        size,
-        search: debounced || undefined,
-    });
+    const startIndex = page * size;
+    const endIndex = startIndex + size;
+    const rows = filteredProduits.slice(startIndex, endIndex);
+    const total = filteredProduits.length;
+    const lastPage = Math.max(Math.ceil(total / size) - 1, 0);
 
     const [produitAConsommer, setProduitAConsommer] = useState<Produit | null>(
         null
@@ -23,10 +32,6 @@ export default function ProduitsList() {
 
     if (isLoading) return <div>Chargement…</div>;
     if (isError) return <div>Erreur</div>;
-
-    const rows = data?.content ?? [];
-    const total = data?.totalElements ?? 0;
-    const lastPage = Math.max(Math.ceil(total / size) - 1, 0);
 
     const canPrev = page > 0;
     const canNext = page < lastPage;
@@ -117,7 +122,7 @@ export default function ProduitsList() {
                         return (
                             <tr key={p.id} className="border-b">
                                 <td className="py-2">{p.nom}</td>
-                                <td>{p.quantite}</td>
+                                <td>{p.quantiteStock}</td>
                                 <td>{p.unite}</td>
                                 <td>{p.prixUnitaire}</td>
                                 <td>

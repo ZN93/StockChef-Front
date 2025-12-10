@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { useCreateProduit } from "./api";
+import { useCreateProduit } from "./api-real";
 import type { NewProduit } from "./types";
 
 export default function ProduitForm() {
     const [nom, setNom] = useState("");
-    const [quantite, setQuantite] = useState<number | "">("");
-    const [unite, setUnite] = useState("u");
+    const [quantiteInitiale, setQuantiteInitiale] = useState<number | "">("");
+    const [unite, setUnite] = useState<"KILOGRAMME" | "PIECE" | "LITRE" | "GRAMME">("PIECE");
     const [prixUnitaire, setPrixUnitaire] = useState<number | "">("");
-    const [dateEntree, setDateEntree] = useState<string>("");        // ← string
-    const [datePeremption, setDatePeremption] = useState<string>(""); // ← string
+    const [seuilAlerte, setSeuilAlerte] = useState<number | "">("");
+    const [description, setDescription] = useState("");
+    const [datePeremption, setDatePeremption] = useState<string>("");
     const [errors, setErrors] = useState<string[]>([]);
     const createProduit = useCreateProduit();
 
@@ -16,11 +17,16 @@ export default function ProduitForm() {
         const errs: string[] = [];
 
         if (!nom.trim()) errs.push("Le nom est requis");
+        if (!description.trim()) errs.push("La description est requise");
 
-        // ne pas convertir "" en 0 : traiter "" comme invalide
-        const qRaw = quantite;
+        const qRaw = quantiteInitiale;
         if (qRaw === "" || isNaN(Number(qRaw)) || Number(qRaw) < 0) {
             errs.push("La quantité doit être ≥ 0");
+        }
+
+        const sRaw = seuilAlerte;
+        if (sRaw === "" || isNaN(Number(sRaw)) || Number(sRaw) < 0) {
+            errs.push("Le seuil d'alerte doit être ≥ 0");
         }
 
         const pRaw = prixUnitaire;
@@ -28,8 +34,8 @@ export default function ProduitForm() {
             errs.push("Le prix doit être ≥ 0");
         }
 
-        if (dateEntree && datePeremption && new Date(datePeremption) <= new Date(dateEntree)) {
-            errs.push("La date de péremption doit être après la date d'entrée");
+        if (!datePeremption) {
+            errs.push("La date de péremption est requise");
         }
 
         return errs;
@@ -41,17 +47,31 @@ export default function ProduitForm() {
         setErrors(errs);
         if (errs.length > 0) return;
 
-        // construit un NewProduit (dates optionnelles)
         const payload: NewProduit = {
             nom,
-            quantite: Number(quantite),
+            quantiteInitiale: Number(quantiteInitiale),
             unite,
             prixUnitaire: Number(prixUnitaire),
-            ...(dateEntree ? { dateEntree } : {}),
-            ...(datePeremption ? { datePeremption } : {}),
+            seuilAlerte: Number(seuilAlerte),
+            description,
+            datePeremption,
         };
 
-        await createProduit.mutateAsync(payload);
+        try {
+            await createProduit.mutateAsync(payload);
+            // Reset form
+            setNom("");
+            setQuantiteInitiale("");
+            setUnite("PIECE");
+            setPrixUnitaire("");
+            setSeuilAlerte("");
+            setDescription("");
+            setDatePeremption("");
+            setErrors([]);
+        } catch (error) {
+            console.error("Error creating product:", error);
+            setErrors(["Erreur lors de la création"]);
+        }
     }
 
     return (
@@ -60,7 +80,7 @@ export default function ProduitForm() {
 
             {errors.length > 0 && (
                 <ul className="text-red-600 text-sm">
-                    {errors.map((e, i) => <li key={i}>{e}</li>)}
+                    {errors.map((e: string, i: number) => <li key={i}>{e}</li>)}
                 </ul>
             )}
 
@@ -69,34 +89,46 @@ export default function ProduitForm() {
                 <input value={nom} onChange={(e) => setNom(e.target.value)} className="border rounded px-2 py-1 w-full" />
             </label>
 
-            <div className="grid grid-cols-2 gap-2">
-                <label className="block">
-                    <span>Quantité</span>
-                    <input type="number" value={quantite} onChange={(e) => setQuantite(e.target.value === "" ? "" : Number(e.target.value))} className="border rounded px-2 py-1 w-full" />
-                </label>
-                <label className="block">
-                    <span>Unité</span>
-                    <input value={unite} onChange={(e) => setUnite(e.target.value)} className="border rounded px-2 py-1 w-full" />
-                </label>
-            </div>
-
             <label className="block">
-                <span>Prix unitaire</span>
-                <input type="number" value={prixUnitaire} onChange={(e) => setPrixUnitaire(e.target.value === "" ? "" : Number(e.target.value))} className="border rounded px-2 py-1 w-full" />
+                <span>Description</span>
+                <input value={description} onChange={(e) => setDescription(e.target.value)} className="border rounded px-2 py-1 w-full" />
             </label>
 
             <div className="grid grid-cols-2 gap-2">
                 <label className="block">
-                    <span>Date d'entrée</span>
-                    <input aria-label="Date d'entrée" type="date" value={dateEntree} onChange={(e) => setDateEntree(e.target.value)} className="border rounded px-2 py-1 w-full" />
+                    <span>Quantité</span>
+                    <input type="number" value={quantiteInitiale} onChange={(e) => setQuantiteInitiale(e.target.value === "" ? "" : Number(e.target.value))} className="border rounded px-2 py-1 w-full" />
                 </label>
                 <label className="block">
-                    <span>Date de péremption</span>
-                    <input aria-label="Date de péremption" type="date" value={datePeremption} onChange={(e) => setDatePeremption(e.target.value)} className="border rounded px-2 py-1 w-full" />
+                    <span>Unité</span>
+                    <select value={unite} onChange={(e) => setUnite(e.target.value as "KILOGRAMME" | "PIECE" | "LITRE" | "GRAMME")} className="border rounded px-2 py-1 w-full">
+                        <option value="PIECE">Pièce</option>
+                        <option value="KILOGRAMME">Kg</option>
+                        <option value="LITRE">Litre</option>
+                        <option value="GRAMME">Gramme</option>
+                    </select>
                 </label>
             </div>
 
-            <button type="submit" className="border px-3 py-1 rounded bg-black text-white">Enregistrer</button>
+            <div className="grid grid-cols-2 gap-2">
+                <label className="block">
+                    <span>Prix unitaire</span>
+                    <input type="number" value={prixUnitaire} onChange={(e) => setPrixUnitaire(e.target.value === "" ? "" : Number(e.target.value))} className="border rounded px-2 py-1 w-full" />
+                </label>
+                <label className="block">
+                    <span>Seuil d'alerte</span>
+                    <input type="number" value={seuilAlerte} onChange={(e) => setSeuilAlerte(e.target.value === "" ? "" : Number(e.target.value))} className="border rounded px-2 py-1 w-full" />
+                </label>
+            </div>
+
+            <label className="block">
+                <span>Date de péremption</span>
+                <input aria-label="Date de péremption" type="date" value={datePeremption} onChange={(e) => setDatePeremption(e.target.value)} className="border rounded px-2 py-1 w-full" />
+            </label>
+
+            <button type="submit" className="border px-3 py-1 rounded bg-black text-white disabled:opacity-50" disabled={createProduit.isPending}>
+                {createProduit.isPending ? "Enregistrement..." : "Enregistrer"}
+            </button>
         </form>
     );
 }

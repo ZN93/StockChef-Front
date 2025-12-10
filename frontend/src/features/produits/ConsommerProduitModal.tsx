@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Produit } from "./types";
-import { useConsommerProduit } from "./api";
+import { useConsommerProduit } from "./api-real";
 
 type ConsommerProduitModalProps = {
     produit: Produit | null;
@@ -28,20 +28,24 @@ export default function ConsommerProduitModal({
             setErrorMsg("La quantité doit être supérieure à 0.");
             return;
         }
-        if (q > produit.quantite) {
+        if (q > produit.quantiteStock) {
             setErrorMsg("Quantité supérieure au stock disponible.");
             return;
         }
 
         try {
-            await mutation.mutateAsync({ id: produit.id, quantite: q });
+            await mutation.mutateAsync({ 
+                id: produit.id, 
+                data: { quantite: q } 
+            });
             // Modal se ferme après succès
             onClose();
-        } catch (err: any) {
+        } catch (err: unknown) {
             // Gestion erreur 400 (stock insuffisant)
-            if (err?.status === 400) {
+            const error = err as { status?: number; data?: { message?: string } };
+            if (error?.status === 400) {
                 setErrorMsg(
-                    err?.data?.message ?? "Stock insuffisant pour cette quantité."
+                    error?.data?.message ?? "Stock insuffisant pour cette quantité."
                 );
             } else {
                 setErrorMsg("Une erreur est survenue. Merci de réessayer.");
@@ -67,7 +71,7 @@ export default function ConsommerProduitModal({
                 <p className="mb-2 text-sm text-gray-700">
                     {produit.nom} — Stock actuel :{" "}
                     <strong>
-                        {produit.quantite} {produit.unite}
+                        {produit.quantiteStock} {produit.unite}
                     </strong>
                 </p>
 
