@@ -3,6 +3,8 @@ import { useProduitsReal } from "./api-real";
 import { computeStatus } from "./status";
 import { useDebounce } from "./useDebounce";
 import ConsommerProduitModal from "./ConsommerProduitModal";
+import EditProduitModal from "./EditProduitModal";
+import DeleteProduitModal from "./DeleteProduitModal";
 import type { Produit } from "./types";
 
 export default function ProduitsList() {
@@ -27,6 +29,12 @@ export default function ProduitsList() {
     const lastPage = Math.max(Math.ceil(total / size) - 1, 0);
 
     const [produitAConsommer, setProduitAConsommer] = useState<Produit | null>(
+        null
+    );
+    const [produitAEditer, setProduitAEditer] = useState<Produit | null>(
+        null
+    );
+    const [produitASupprimer, setProduitASupprimer] = useState<Produit | null>(
         null
     );
 
@@ -129,13 +137,36 @@ export default function ProduitsList() {
                                     <span className={cls}>{labelFor[s]}</span>
                                 </td>
                                 <td className="px-4 py-2 text-right">
-                                    <button
-                                        type="button"
-                                        onClick={() => setProduitAConsommer(p)}
-                                        className="rounded-lg bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700"
-                                    >
-                                        Consommer
-                                    </button>
+                                    <div className="flex items-center justify-end gap-1">
+                                        {/* Botón Editar */}
+                                        <button
+                                            type="button"
+                                            onClick={() => setProduitAEditer(p)}
+                                            className="rounded-lg bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700 transition-colors"
+                                            title="Modifier le produit"
+                                        >
+                                            Edit
+                                        </button>
+                                        
+                                        {/* Botón Eliminar */}
+                                        <button
+                                            type="button"
+                                            onClick={() => setProduitASupprimer(p)}
+                                            className="rounded-lg bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700 transition-colors"
+                                            title="Supprimer"
+                                        >
+                                            Delete
+                                        </button>
+                                        
+                                        {/* Botón Consommer */}
+                                        <button
+                                            type="button"
+                                            onClick={() => setProduitAConsommer(p)}
+                                            className="rounded-lg bg-emerald-600 px-3 py-1 text-xs font-medium text-white hover:bg-emerald-700"
+                                        >
+                                            Consommer
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         );
@@ -167,6 +198,22 @@ export default function ProduitsList() {
                 <ConsommerProduitModal
                     produit={produitAConsommer}
                     onClose={() => setProduitAConsommer(null)}
+                />
+            )}
+
+            {/* Modal d'édition */}
+            {produitAEditer && (
+                <EditProduitModal
+                    produit={produitAEditer}
+                    onClose={() => setProduitAEditer(null)}
+                />
+            )}
+
+            {/* Modal de suppression */}
+            {produitASupprimer && (
+                <DeleteProduitModal
+                    produit={produitASupprimer}
+                    onClose={() => setProduitASupprimer(null)}
                 />
             )}
         </div>

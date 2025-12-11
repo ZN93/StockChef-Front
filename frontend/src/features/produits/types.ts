@@ -37,6 +37,15 @@ export type ConsommerProduitRequest = {
     motif?: string;
 };
 
+// Tipo para editar productos (todos los campos opcionales según API)
+export type EditProduitRequest = {
+    nom?: string;
+    prixUnitaire?: number;
+    seuilAlerte?: number;
+    datePeremption?: string; // YYYY-MM-DD
+    description?: string;
+};
+
 // Tipo para resumen de inventario
 export type InventorySummary = {
     totalProduits: number;
