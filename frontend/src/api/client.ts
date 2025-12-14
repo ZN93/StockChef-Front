@@ -22,7 +22,7 @@ export const api = axios.create({
  * On passe par une autre instance pour ne pas casser les mocks.
  */
 export const authApi = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL ?? "https://stockchef-back-production.up.railway.app/api",
+    baseURL: import.meta.env.VITE_BACKEND_URL ?? "https://stockchef-back.onrender.com/api",
 });
 
 type StoredAuth = {
