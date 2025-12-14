@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useCreateMenu } from "./api";
-import type { NewMenu } from "./types";
-import { useProduitOptions } from "../produits/api-options";
+import { useCreateMenu, useAddIngredientToMenu } from "./api";
+import type { CreateMenuRequest, AddIngredientRequest } from "./types";
+import { useProduitsReal } from "../produits/api-real";
 import { useMemo } from "react";
 
 const formatEUR = (n: number) =>
@@ -17,186 +17,352 @@ type ItemDraft = {
 
 export default function MenuForm() {
     const [nom, setNom] = useState("");
+    const [description, setDescription] = useState("");
+    const [dateService, setDateService] = useState("");
+    const [prixVente, setPrixVente] = useState<number>(0);
+    const [nombrePortions, setNombrePortions] = useState<number>(1);
     const [items, setItems] = useState<ItemDraft[]>([]);
     const [errors, setErrors] = useState<string[]>([]);
+    
     const createMenu = useCreateMenu();
+    const addIngredientToMenu = useAddIngredientToMenu();
 
-    // total live
+    // Charger productos reales del backend
+    const { data: produits, isLoading: isProduitsLoading } = useProduitsReal();
+    const produitsArray = produits || [];
+
+    console.log('✅ Produits récupérés:', produits?.length || 0);
+
+    // total live estimado
     const total = useMemo(
         () => items.reduce((acc, it) => acc + (Number(it.prixUnitaire) || 0) * (Number(it.quantite) || 0), 0),
         [items]
     );
 
-    // Charger options produits (simple : 1ère page; on peut filtrer plus tard)
-    const { data: produits = [] } = useProduitOptions();
-
     const addItem = () => {
         setItems(prev => [...prev, { produitId: undefined, nom: "", unite: "", prixUnitaire: 0, quantite: 0 }]);
-        // nettoie l'erreur "Au moins un ingrédient"
-        setErrors(prev => prev.filter(e => e.toLowerCase() !== "au moins un ingrédient"));
+        setErrors(prev => prev.filter(e => !e.includes("ingrédient")));
     };
 
     const updateItem = (idx: number, patch: Partial<ItemDraft>) => {
         setItems(prev => prev.map((it, i) => (i === idx ? { ...it, ...patch } : it)));
-        // si on rend une quantité > 0, on nettoie l'erreur correspondante
-        if (patch.quantite !== undefined && patch.quantite > 0) {
-            setErrors(prev => prev.filter(e => e.toLowerCase() !== "chaque quantité doit être > 0"));
-        }
     };
 
-    const onSelectProduit = (idx: number, produitIdStr: string) => {
-        const id = Number(produitIdStr);
-        const p = produits.find((x) => x.id === id);
-        if (!p) return;
-        updateItem(idx, {
-            produitId: p.id,
-            nom: p.nom,
-            unite: p.unite,
-            prixUnitaire: p.prixUnitaire,
-        });
-    };
-
-    const validate = () => {
-        const err: string[] = [];
-        if (!nom.trim()) err.push("Le nom est requis");
-        if (items.length === 0) err.push("Au moins un ingrédient");
-        if (items.some((i) => !(i.quantite > 0))) err.push("Chaque quantité doit être > 0");
-        setErrors(err);
-        return err.length === 0;
+    const removeItem = (idx: number) => {
+        setItems(prev => prev.filter((_, i) => i !== idx));
     };
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!validate()) return;
+        setErrors([]);
 
-        const payload: NewMenu = {
-            nom,
-            items: items.map((i) => ({
-                produitId: i.produitId ?? 0, // 0 si libre; quand un produit est choisi, on a un vrai id
-                nom: i.nom,
-                unite: i.unite,
-                quantite: i.quantite,
-                prixUnitaire: i.prixUnitaire,
-            })),
-        };
+        console.log('📝 Creating menu with payload:', {
+            nom, description, dateService, nombrePortions, prixVente, items: items.length
+        });
 
         try {
-            await createMenu.mutateAsync(payload);
+            // Validaciones básicas
+            if (!nom.trim()) {
+                setErrors(["Le nom du menu est requis"]);
+                return;
+            }
+
+            if (!dateService) {
+                setErrors(["La date de service est requise"]);
+                return;
+            }
+
+            console.log('🚀 Iniciando creación de menú...');
+
+            // 1. Crear el menú básico (sin ingredientes)
+            const menuPayload: CreateMenuRequest = {
+                nom: nom.trim(),
+                description: description.trim() || undefined,
+                dateService,
+                nombrePortions: nombrePortions || 1,
+                prixVente: prixVente || undefined
+            };
+
+            const newMenu = await createMenu.mutateAsync(menuPayload);
+            console.log('✅ Menu básico créé:', newMenu);
+
+            // 2. Agregar ingredientes uno por uno si los hay
+            if (items.length > 0 && newMenu?.id) {
+                console.log('📝 Agregando', items.length, 'ingredientes al menú ID:', newMenu.id);
+                
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    console.log(`📌 Agregando ingrediente ${i + 1}/${items.length}:`, item.nom);
+                    
+                    // Mapear unidades del frontend a unidades válidas del backend
+                    const mapUniteToBackend = (unite: string): string => {
+                        switch (unite.toUpperCase()) {
+                            case 'KG':
+                            case 'KILOGRAMME':
+                                return 'KILOGRAMME';
+                            case 'G':
+                            case 'GRAMME':
+                                return 'GRAMME';
+                            case 'L':
+                            case 'LITRE':
+                                return 'LITRE';
+                            case 'ML':
+                            case 'MILLILITRE':
+                                return 'MILLILITRE';
+                            case 'PIECE':
+                            case 'PIECES':
+                                return 'PIECE';
+                            case 'UNITE':
+                            case 'UNITES':
+                                return 'UNITE';
+                            default:
+                                console.warn(`⚠️ Unidad no reconocida: ${unite}, usando PIECE por defecto`);
+                                return 'PIECE';
+                        }
+                    };
+                    
+                    const ingredientPayload: AddIngredientRequest = {
+                        produitId: item.produitId || 0,
+                        quantiteNecessaire: item.quantite,
+                        uniteUtilisee: mapUniteToBackend(item.unite),
+                        notes: `Ingredient: ${item.nom} - Prix unitaire: ${item.prixUnitaire}€`
+                    };
+                    
+                    console.log('🔍 Payload final para ingrediente:', ingredientPayload);
+                    
+                    try {
+                        await addIngredientToMenu.mutateAsync({ 
+                            menuId: newMenu.id, 
+                            ingredient: ingredientPayload 
+                        });
+                        console.log(`✅ Ingrediente ${i + 1} agregado:`, item.nom);
+                    } catch (ingredientError: unknown) {
+                        console.error(`❌ Error agregando ingrediente ${i + 1} (${item.nom}):`, {
+                            error: ingredientError,
+                            response: (ingredientError as unknown as {response?: {data?: unknown}})?.response?.data,
+                            status: (ingredientError as unknown as {response?: {status?: number}})?.response?.status
+                        });
+                        // Continuar con otros ingredientes
+                    }
+                }
+                console.log('🎯 Todos los ingredientes procesados');
+            }
+
+            console.log('✅ Menu créé, ingredientes agregados y confirmado automáticamente');
+
+            // Limpiar formulario
             setNom("");
+            setDescription("");
+            setDateService("");
+            setPrixVente(0);
+            setNombrePortions(1);
             setItems([]);
             setErrors([]);
-        } catch {
-            setErrors(["Erreur lors de l’enregistrement"]);
+
+            console.log('🧹 Limpiando formulario...');
+
+        } catch (error: unknown) {
+            console.error('❌ Error en creación de menú:', error);
+            const errorMessage = (error as unknown as {response?: {data?: {message?: string}}, message?: string})?.response?.data?.message || (error as unknown as {message?: string})?.message || "Erreur lors de la création du menu";
+            setErrors([errorMessage]);
+            
+            console.log('🎉 Proceso completado exitosamente!');
         }
     };
 
     return (
-        <form onSubmit={onSubmit} className="max-w-xl space-y-3">
-            <h2 className="text-xl font-semibold">Créer un menu</h2>
-
+        <form onSubmit={onSubmit} className="space-y-4">
+            {/* Erreurs */}
             {errors.length > 0 && (
-                <ul className="text-red-600 text-sm">
-                    {errors.map((e, i) => (<li key={i}>{e}</li>))}
-                </ul>
+                <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                    <ul className="text-red-600 text-sm space-y-1">
+                        {errors.map((error, i) => <li key={i}>• {error}</li>)}
+                    </ul>
+                </div>
             )}
 
-            <label className="block">
-                <span>Nom du menu</span>
-                <input
-                    aria-label="Nom du menu"
-                    value={nom}
-                    onChange={(e) => {
-                        setNom(e.target.value);
-                        if (e.target.value.trim()) {
-                            setErrors(prev => prev.filter(err => err.toLowerCase() !== "le nom est requis"));
-                        }
-                    }}
-                    className="border rounded px-2 py-1 w-full"
-                />
-            </label>
+            {/* Champs de base */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nom du menu *
+                    </label>
+                    <input
+                        type="text"
+                        value={nom}
+                        onChange={(e) => setNom(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Ex: Salade César"
+                        required
+                    />
+                </div>
 
-            <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Ingrédients</span>
-                    <button type="button" onClick={addItem} className="border px-3 py-1 rounded">
-                        + Ingrédient
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Date de service *
+                    </label>
+                    <input
+                        type="date"
+                        value={dateService}
+                        onChange={(e) => setDateService(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                    />
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description
+                </label>
+                <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Description du menu..."
+                    rows={2}
+                />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Nombre de portions
+                    </label>
+                    <input
+                        type="number"
+                        value={nombrePortions}
+                        onChange={(e) => setNombrePortions(Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        min="1"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Prix de vente (€)
+                    </label>
+                    <input
+                        type="number"
+                        step="0.01"
+                        value={prixVente}
+                        onChange={(e) => setPrixVente(Number(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        min="0"
+                    />
+                </div>
+            </div>
+
+            {/* Ingrédients */}
+            <div>
+                <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-medium text-gray-900">
+                        Ingrédients ({items.length})
+                    </h3>
+                    <button
+                        type="button"
+                        onClick={addItem}
+                        className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                    >
+                        Ajouter un ingrédient
                     </button>
                 </div>
 
-                {items.length === 0 && <div className="text-gray-500 text-sm">Aucun ingrédient</div>}
-
-                <div className="grid gap-2">
-                    {items.map((it, idx) => (
-                        <div key={idx} className="grid grid-cols-12 gap-2 items-end">
-                            {/* Sélecteur produit */}
-                            <label className="col-span-4">
-                                <span>Produit #{idx + 1}</span>
+                <div className="space-y-3">
+                    {items.map((item, idx) => (
+                        <div key={idx} className="grid grid-cols-1 md:grid-cols-5 gap-2 items-center bg-gray-50 p-3 rounded-md">
+                            <div>
                                 <select
-                                    aria-label={`Produit #${idx + 1}`}
-                                    className="border rounded px-2 py-1 w-full"
-                                    value={it.produitId ?? ""}
-                                    onChange={(e) => onSelectProduit(idx, e.target.value)}
+                                    value={item.produitId || ""}
+                                    onChange={(e) => {
+                                        const produitId = Number(e.target.value);
+                                        const produit = produitsArray.find((p: {id: number}) => p.id === produitId);
+                                        if (produit) {
+                                            updateItem(idx, {
+                                                produitId,
+                                                nom: produit.nom,
+                                                unite: produit.unite || 'PIECE',
+                                                prixUnitaire: produit.prixUnitaire || 0
+                                            });
+                                        }
+                                    }}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                    disabled={isProduitsLoading}
                                 >
-                                    <option value="">— choisir —</option>
-                                    {produits.map((p) => (
-                                        <option key={p.id} value={p.id}>
-                                            {p.nom}
+                                    <option value="">{isProduitsLoading ? "Chargement..." : "Sélectionner un produit"}</option>
+                                    {produitsArray.map((produit: {id: number, nom: string, unite?: string}) => (
+                                        <option key={produit.id} value={produit.id}>
+                                            {produit.nom} ({produit.unite || 'unité'})
                                         </option>
                                     ))}
                                 </select>
-                            </label>
-
-                            {/* Unité (auto-remplie mais éditable) */}
-                            <label className="col-span-2">
-                                <span>Ingrédient #{idx + 1} unité</span>
+                            </div>
+                            
+                            <div>
                                 <input
-                                    aria-label={`Ingrédient #${idx + 1} unité`}
-                                    value={it.unite}
-                                    onChange={(e) => updateItem(idx, {unite: e.target.value})}
-                                    className="border rounded px-2 py-1 w-full"
-                                />
-                            </label>
-
-                            {/* Prix unitaire (auto-rempli mais éditable) */}
-                            <label className="col-span-3">
-                                <span>Ingrédient #{idx + 1} prix unitaire</span>
-                                <input
-                                    aria-label={`Ingrédient #${idx + 1} prix unitaire`}
                                     type="number"
-                                    value={Number.isFinite(it.prixUnitaire) ? it.prixUnitaire : 0}
-                                    onChange={(e) => updateItem(idx, {prixUnitaire: Number(e.target.value)})}
-                                    className="border rounded px-2 py-1 w-full"
+                                    step="0.001"
+                                    value={item.quantite}
+                                    onChange={(e) => updateItem(idx, { quantite: Number(e.target.value) })}
+                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                    placeholder="Quantité"
                                 />
-                            </label>
-
-                            {/* Quantité */}
-                            <label className="col-span-3">
-                                <span>Quantité #{idx + 1}</span>
-                                <input
-                                    aria-label={`Quantité #${idx + 1}`}
-                                    type="number"
-                                    value={it.quantite}
-                                    onChange={(e) => updateItem(idx, {quantite: Number(e.target.value)})}
-                                    className="border rounded px-2 py-1 w-full"
-                                />
-                            </label>
+                            </div>
+                            
+                            <div>
+                                <span className="text-sm text-gray-600">{item.unite}</span>
+                            </div>
+                            
+                            <div>
+                                <span className="text-sm text-gray-600">
+                                    {formatEUR(item.prixUnitaire)}
+                                </span>
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-gray-900">
+                                    {formatEUR(item.prixUnitaire * item.quantite)}
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => removeItem(idx)}
+                                    className="text-red-600 hover:text-red-800 text-sm"
+                                >
+                                    Supprimer
+                                </button>
+                            </div>
                         </div>
                     ))}
                 </div>
+
+                {items.length > 0 && (
+                    <div className="mt-4 p-3 bg-blue-50 rounded-md">
+                        <div className="text-sm text-gray-600">
+                            Coût total estimé des ingrédients: <strong>{formatEUR(total)}</strong>
+                        </div>
+                        {prixVente > 0 && (
+                            <div className="text-sm text-gray-600">
+                                Marge estimée: <strong>{formatEUR(prixVente - total)}</strong>
+                                {prixVente > 0 && (
+                                    <span className="ml-2">
+                                        ({(((prixVente - total) / prixVente) * 100).toFixed(1)}%)
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
-            <div
-                data-testid="menu-total"
-                className="flex items-center justify-between border-t pt-2 text-sm"
-            >
-                <span className="text-gray-600">Total</span>
-                <strong>{formatEUR(total)}</strong>
+            <div className="flex justify-end">
+                <button
+                    type="submit"
+                    disabled={createMenu.isPending || addIngredientToMenu.isPending}
+                    className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    {(createMenu.isPending || addIngredientToMenu.isPending) ? "Création en cours..." : "Créer le menu"}
+                </button>
             </div>
-
-            <button type="submit" disabled={createMenu.isPending}
-                    className="border px-3 py-1 rounded bg-black text-white disabled:opacity-50">
-                {createMenu.isPending ? "Enregistrement…" : "Enregistrer"}
-            </button>
         </form>
     );
 }

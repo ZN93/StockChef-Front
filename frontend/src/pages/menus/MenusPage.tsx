@@ -4,7 +4,17 @@ import { SectionCard, Chip } from "../../ui/kit";
 
 export default function MenusPage() {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1">
+
+            {/* --- Colonne droite : Liste des menus existants --- */}
+            <div className="md:col-span-2 space-y-6">
+                <SectionCard
+                    title="Menus récents"
+                    actions={<Chip type="success">Auto-MAJ</Chip>}
+                >
+                    <MenuList />
+                </SectionCard>
+            </div>
 
             {/* --- Colonne gauche : Formulaire de création --- */}
             <div className="md:col-span-1">
@@ -16,15 +26,7 @@ export default function MenusPage() {
                 </SectionCard>
             </div>
 
-            {/* --- Colonne droite : Liste des menus existants --- */}
-            <div className="md:col-span-2 space-y-6">
-                <SectionCard
-                    title="Menus récents"
-                    actions={<Chip type="success">Auto-MAJ</Chip>}
-                >
-                    <MenuList />
-                </SectionCard>
-            </div>
+            
         </div>
     );
 }
