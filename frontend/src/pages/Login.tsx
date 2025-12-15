@@ -67,6 +67,16 @@ export default function LoginPage() {
                 >
                     {loading ? "Connexion..." : "Se connecter"}
                 </button>
+
+                <div className="text-center">
+                    <button
+                        type="button"
+                        onClick={() => navigate("/register")}
+                        className="text-sm text-gray-600 hover:text-gray-800"
+                    >
+                        Pas de compte ? Créer un compte
+                    </button>
+                </div>
             </form>
         </div>
     );

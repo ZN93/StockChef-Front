@@ -23,7 +23,7 @@ export default function DashboardPage() {
     // Hooks pour obtenir les données réelles
     const { data: summary, isLoading: isSummaryLoading, isError: isSummaryError } = useDashboardSummary();
     const { data: alerts, isLoading: isAlertsLoading } = useProductsInAlert();
-    const { data: expiring, isLoading: isExpiringLoading } = useExpiringProducts(JOURS_PEREMPTION);
+    const { isLoading: isExpiringLoading } = useExpiringProducts(JOURS_PEREMPTION);
     const { data: recentProducts, isLoading: isRecentLoading } = useRecentProducts(5);
 
     // Calculer les KPIs
@@ -117,7 +117,7 @@ export default function DashboardPage() {
                                     <td>{formatCurrency(p.prixUnitaire)}</td>
                                     <td>{formatDate(p.dateEntree)}</td>
                                     <td className={
-                                        p.isExpired ? "text-red-600 font-medium" :
+                                        p.isUnderAlertThreshold ? "text-red-600 font-medium" :
                                         new Date(p.datePeremption).getTime() - new Date().getTime() < (3 * 24 * 60 * 60 * 1000) 
                                             ? "text-orange-600 font-medium" : ""
                                     }>

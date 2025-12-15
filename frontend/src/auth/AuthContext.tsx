@@ -20,9 +20,16 @@ type AuthState = {
 
 type AuthContextValue = {
     auth: AuthState;
+    user: AuthState; // Alias para compatibilidad
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
     hasRole: (...roles: SimpleRole[]) => boolean;
+    isAdmin: () => boolean;
+    isChef: () => boolean;
+    isDeveloper: () => boolean;
+    canManageInventory: () => boolean;
+    canManageMenus: () => boolean;
+    canManageUsers: () => boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -78,8 +85,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         [auth.role]
     );
 
+    // Role-specific helper functions
+    const isAdmin = useCallback(() => hasRole("ADMIN"), [hasRole]);
+    const isChef = useCallback(() => hasRole("CHEF"), [hasRole]);
+    const isDeveloper = useCallback(() => hasRole("DEVELOPER"), [hasRole]);
+
+    // Permission helper functions
+    const canManageInventory = useCallback(
+        () => hasRole("DEVELOPER", "ADMIN", "CHEF"),
+        [hasRole]
+    );
+
+    const canManageMenus = useCallback(
+        () => hasRole("DEVELOPER", "ADMIN", "CHEF"),
+        [hasRole]
+    );
+
+    const canManageUsers = useCallback(
+        () => hasRole("DEVELOPER", "ADMIN"),
+        [hasRole]
+    );
+
     return (
-        <AuthContext.Provider value={{ auth, login, logout, hasRole }}>
+        <AuthContext.Provider value={{ 
+            auth, 
+            user: auth, // Alias para compatibilidad
+            login, 
+            logout, 
+            hasRole,
+            isAdmin,
+            isChef,
+            isDeveloper,
+            canManageInventory,
+            canManageMenus,
+            canManageUsers
+        }}>
             {children}
         </AuthContext.Provider>
     );

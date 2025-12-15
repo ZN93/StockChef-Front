@@ -19,8 +19,8 @@ export default function MenuForm() {
     const [nom, setNom] = useState("");
     const [description, setDescription] = useState("");
     const [dateService, setDateService] = useState("");
-    const [prixVente, setPrixVente] = useState<number>(0);
-    const [nombrePortions, setNombrePortions] = useState<number>(1);
+    const [prixVente, setPrixVente] = useState<string>("");
+    const [nombrePortions, setNombrePortions] = useState<string>("");
     const [items, setItems] = useState<ItemDraft[]>([]);
     const [errors, setErrors] = useState<string[]>([]);
     
@@ -79,8 +79,8 @@ export default function MenuForm() {
                 nom: nom.trim(),
                 description: description.trim() || undefined,
                 dateService,
-                nombrePortions: nombrePortions || 1,
-                prixVente: prixVente || undefined
+                nombrePortions: Number(nombrePortions) || 1,
+                prixVente: Number(prixVente) || undefined
             };
 
             const newMenu = await createMenu.mutateAsync(menuPayload);
@@ -154,8 +154,8 @@ export default function MenuForm() {
             setNom("");
             setDescription("");
             setDateService("");
-            setPrixVente(0);
-            setNombrePortions(1);
+            setPrixVente("");
+            setNombrePortions("");
             setItems([]);
             setErrors([]);
 
@@ -232,9 +232,10 @@ export default function MenuForm() {
                     <input
                         type="number"
                         value={nombrePortions}
-                        onChange={(e) => setNombrePortions(Number(e.target.value))}
+                        onChange={(e) => setNombrePortions(e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         min="1"
+                        placeholder="Nombre de portions"
                     />
                 </div>
 
@@ -246,9 +247,10 @@ export default function MenuForm() {
                         type="number"
                         step="0.01"
                         value={prixVente}
-                        onChange={(e) => setPrixVente(Number(e.target.value))}
+                        onChange={(e) => setPrixVente(e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         min="0"
+                        placeholder="Prix de vente"
                     />
                 </div>
             </div>
@@ -340,15 +342,13 @@ export default function MenuForm() {
                         <div className="text-sm text-gray-600">
                             Coût total estimé des ingrédients: <strong>{formatEUR(total)}</strong>
                         </div>
-                        {prixVente > 0 && (
-                            <div className="text-sm text-gray-600">
-                                Marge estimée: <strong>{formatEUR(prixVente - total)}</strong>
-                                {prixVente > 0 && (
-                                    <span className="ml-2">
-                                        ({(((prixVente - total) / prixVente) * 100).toFixed(1)}%)
-                                    </span>
-                                )}
-                            </div>
+                        {Number(prixVente) > 0 && (
+                            <p className="text-sm text-gray-600">
+                                Marge estimée: <strong>{formatEUR(Number(prixVente) - total)}</strong>
+                                <span className="ml-2">
+                                    ({(((Number(prixVente) - total) / Number(prixVente)) * 100).toFixed(1)}%)
+                                </span>
+                            </p>
                         )}
                     </div>
                 )}

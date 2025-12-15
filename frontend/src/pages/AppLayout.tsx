@@ -2,7 +2,7 @@ import { NavLink, Outlet } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext";
 
 export default function AppLayout() {
-    const { auth, logout, hasRole } = useAuth();
+    const { auth, logout, hasRole, canManageUsers } = useAuth();
 
     const linkBase =
         "px-3 py-2 rounded-full text-sm whitespace-nowrap transition-colors";
@@ -17,7 +17,7 @@ export default function AppLayout() {
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
                     {/* Logo / titre */}
                     <div className="text-lg sm:text-xl font-bold tracking-tight">
-                        La Cantinière
+                        StockChef App
                     </div>
 
                     {/* Liens de navigation */}
@@ -75,6 +75,18 @@ export default function AppLayout() {
                             >
                                 Alertes
                             </NavLink>
+
+                            {/* Gestión de usuarios solo para ADMIN/DEVELOPER */}
+                            {canManageUsers() && (
+                                <NavLink
+                                    to="/app/usuarios"
+                                    className={({isActive}) =>
+                                        `${linkBase} ${isActive ? linkActive : linkInactive}`
+                                    }
+                                >
+                                    Usuarios
+                                </NavLink>
+                            )}
                         </div>
                     </nav>
 
@@ -94,6 +106,12 @@ export default function AppLayout() {
                                 Connecté : {auth?.role}
                             </div>
                         </div>
+                        <NavLink
+                            to="/app/profile"
+                            className="text-xs sm:text-sm text-blue-600 hover:text-blue-700"
+                        >
+                            Profil
+                        </NavLink>
                         <button
                             type="button"
                             onClick={logout}

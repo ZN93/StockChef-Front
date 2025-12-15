@@ -84,3 +84,42 @@ api.interceptors.request.use((config) => {
     }
     return config;
 });
+
+// Interceptor para authApi (backend Spring)
+authApi.interceptors.request.use((config) => {
+    console.log(`🔄 Making authApi request to: ${config.method?.toUpperCase()} ${config.url}`);
+    
+    const raw = localStorage.getItem("stockchef_auth");
+    if (raw) {
+        try {
+            const auth = JSON.parse(raw) as StoredAuth;
+            if (auth.token) {
+                config.headers = config.headers || {};
+                config.headers.Authorization = `Bearer ${auth.token}`;
+                console.log(`🔑 Token added to authApi request`);
+            }
+        } catch (error) {
+            console.warn("⚠️ Error parsing auth token:", error);
+        }
+    }
+    return config;
+});
+
+authApi.interceptors.response.use(
+    (response) => {
+        console.log(`✅ AuthApi response success: ${response.status} ${response.config.url}`);
+        return response;
+    },
+    (error) => {
+        console.log(`❌ AuthApi response error: ${error.response?.status} ${error.config?.url}`);
+        console.log(`❌ Error details: ${error.response?.data || error.message}`);
+        
+        // Redirect to login on 401
+        if (error.response?.status === 401) {
+            localStorage.removeItem("stockchef_auth");
+            window.location.href = "/login";
+        }
+        
+        return Promise.reject(error);
+    }
+);

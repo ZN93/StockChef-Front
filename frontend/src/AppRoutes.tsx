@@ -2,6 +2,9 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import RouteGuard from "./auth/RouteGuard";
 import LoginPage from "./pages/Login.tsx";
+import Register from "./pages/Register";
+import Profile from "./pages/Profile";
+import UsersPage from "./pages/UsersPage";
 import AppLayout from "./pages/AppLayout";
 import ProduitsPage from "./pages/produits/ProduitsPage";
 import MenusPage from "./pages/menus/MenusPage";
@@ -11,6 +14,7 @@ import DashboardPage from "./pages/DashboardPage.tsx";
 
 const router = createBrowserRouter([
     { path: "/login", element: <LoginPage /> },
+    { path: "/register", element: <Register /> },
     {
         path: "/app",
         element: <RouteGuard />,
@@ -23,6 +27,8 @@ const router = createBrowserRouter([
                     { path: "menus", element: <MenusPage /> },
                     { path: "alertes", element: <AlertesPage /> },
                     { path: "rapports", element: <RapportsPage /> }, // RouteGuard + hasRole feront le reste
+                    { path: "profile", element: <Profile /> },
+                    { path: "usuarios", element: <UsersPage /> },
                 ],
             },
         ],
