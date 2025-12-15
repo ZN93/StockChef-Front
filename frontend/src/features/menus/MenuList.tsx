@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMenus, useSearchMenus, useMenusRealisables } from "./api";
+import { useMenus, useMenusRealisables } from "./api";
 import EditMenuModal from "./EditMenuModal";
 import DeleteMenuModal from "./DeleteMenuModal";
 import MenuActionsModal from "./MenuActionsModal";
@@ -24,21 +24,17 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [actionsModalOpen, setActionsModalOpen] = useState(false);
     
-    // Estados para filtros y búsqueda
-    const [searchTerm, setSearchTerm] = useState("");
-    const [viewMode, setViewMode] = useState<"all" | "realizable" | "search">("all");
+    // Estados para filtros
+    const [viewMode, setViewMode] = useState<"all" | "realizable">("all");
     const [selectedDate, setSelectedDate] = useState<string>("");
 
     // Hooks para diferentes vistas
     const { data: allMenus, isLoading: isLoadingAll, isError: isErrorAll } = useMenus({ page: 0, size: 20 });
-    const { data: searchResults, isLoading: isSearching } = useSearchMenus(searchTerm);
     const { data: realizableMenus, isLoading: isLoadingRealizable } = useMenusRealisables(selectedDate);
 
     // Determinar qué datos mostrar
     const getCurrentData = () => {
         switch (viewMode) {
-            case "search":
-                return { content: searchResults || [], totalElements: searchResults?.length || 0 };
             case "realizable":
                 return { content: realizableMenus || [], totalElements: realizableMenus?.length || 0 };
             default:
@@ -47,22 +43,16 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
     };
 
     const currentData = getCurrentData();
-    const isLoading = isLoadingAll || (viewMode === "search" && isSearching) || (viewMode === "realizable" && isLoadingRealizable);
+    const isLoading = isLoadingAll || (viewMode === "realizable" && isLoadingRealizable);
     const isError = isErrorAll;
 
     // Manejadores de filtros
-    const handleSearch = (term: string) => {
-        setSearchTerm(term);
-        setViewMode(term ? "search" : "all");
-    };
-
     const handleDateFilter = (date: string) => {
         setSelectedDate(date);
         setViewMode(date ? "realizable" : "all");
     };
 
     const handleClearFilters = () => {
-        setSearchTerm("");
         setSelectedDate("");
         setViewMode("all");
     };
@@ -83,20 +73,6 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
                         </div>
                         
                         <div className="flex flex-col sm:flex-row gap-4">
-                            {/* Búsqueda */}
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    placeholder="Buscar menús..."
-                                    value={searchTerm}
-                                    onChange={(e) => handleSearch(e.target.value)}
-                                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-64"
-                                />
-                                <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </div>
-
                             {/* Filtro por fecha */}
                             <div className="flex gap-2">
                                 <input
@@ -107,7 +83,7 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
                                     title="Filtrar menús realizables por fecha"
                                 />
                                 
-                                {(searchTerm || selectedDate) && (
+                                {selectedDate && (
                                     <button
                                         onClick={handleClearFilters}
                                         className="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -136,26 +112,11 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
                         <h1 className="text-2xl font-bold text-gray-900">Gestión de Menús</h1>
                         <p className="text-gray-600 mt-1">
                             Encontrados {currentData.totalElements} menús
-                            {viewMode === "search" && ` para "${searchTerm}"`}
                             {viewMode === "realizable" && ` realizables para ${selectedDate}`}
                         </p>
                     </div>
                     
                     <div className="flex flex-col sm:flex-row gap-4">
-                        {/* Búsqueda */}
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Buscar menús..."
-                                value={searchTerm}
-                                onChange={(e) => handleSearch(e.target.value)}
-                                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-64"
-                            />
-                            <svg className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        </div>
-
                         {/* Filtro por fecha */}
                         <div className="flex gap-2">
                             <input
@@ -166,7 +127,7 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
                                 title="Filtrar menús realizables por fecha"
                             />
                             
-                            {(searchTerm || selectedDate) && (
+                            {selectedDate && (
                                 <button
                                     onClick={handleClearFilters}
                                     className="px-3 py-2 text-gray-500 hover:text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -314,7 +275,6 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
             {currentData?.totalElements && currentData.totalElements > 20 && (
                 <div className="mt-4 text-sm text-gray-600 text-center bg-white rounded-lg border border-gray-200 p-4">
                     Mostrando {Math.min(20, rows.length)} de {currentData.totalElements} menús
-                    {viewMode === "search" && ` que coinciden con "${searchTerm}"`}
                     {viewMode === "realizable" && ` realizables para ${selectedDate}`}
                 </div>
             )}
