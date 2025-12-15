@@ -14,29 +14,24 @@ export default function Profile() {
     const [isChangingPassword, setIsChangingPassword] = useState(false);
     const [error, setError] = useState<string>("");
     const [success, setSuccess] = useState<string>("");
-    
-    // Profile form state
     const [profileForm, setProfileForm] = useState({
         firstName: "",
         lastName: "",
         email: ""
     });
-    
-    // Password form state
+
     const [passwordForm, setPasswordForm] = useState({
         currentPassword: "",
         newPassword: "",
         confirmPassword: ""
     });
-    
-    // Get user profile
+
     const { data: profile, isLoading, error: profileError } = useQuery({
         queryKey: ["userProfile"],
         queryFn: getUserProfileApi,
         enabled: !!user
     });
-    
-    // Update profile mutation
+
     const updateProfileMutation = useMutation({
         mutationFn: (data: UpdateProfilePayload) => updateProfileApi(data),
         onSuccess: () => {
@@ -55,8 +50,7 @@ export default function Profile() {
             setSuccess("");
         }
     });
-    
-    // Change password mutation
+
     const changePasswordMutation = useMutation({
         mutationFn: (data: ChangePasswordPayload) => changePasswordApi(data),
         onSuccess: () => {
@@ -75,8 +69,7 @@ export default function Profile() {
             setSuccess("");
         }
     });
-    
-    // Initialize profile form when data loads
+
     useEffect(() => {
         if (profile) {
             setProfileForm({
@@ -180,7 +173,6 @@ export default function Profile() {
         <div className="min-h-screen bg-gray-50 py-8">
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="bg-white rounded-lg shadow">
-                    {/* Header */}
                     <div className="px-6 py-4 border-b border-gray-200">
                         <div className="flex items-center justify-between">
                             <div>
@@ -195,8 +187,7 @@ export default function Profile() {
                             </button>
                         </div>
                     </div>
-                    
-                    {/* Alerts */}
+
                     {error && (
                         <div className="mx-6 mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
                             <p className="text-red-600">{error}</p>
@@ -210,7 +201,6 @@ export default function Profile() {
                     )}
                     
                     <div className="p-6 space-y-8">
-                        {/* Profile Information */}
                         <div>
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-lg font-semibold text-gray-900">Informations personnelles</h2>
@@ -329,8 +319,7 @@ export default function Profile() {
                                 </form>
                             )}
                         </div>
-                        
-                        {/* Change Password */}
+
                         <div className="border-t pt-8">
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-lg font-semibold text-gray-900">Sécurité</h2>

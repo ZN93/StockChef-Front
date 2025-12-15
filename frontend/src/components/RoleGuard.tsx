@@ -7,9 +7,6 @@ interface RoleGuardProps {
     fallback?: React.ReactNode;
 }
 
-/**
- * Componente para mostrar contenido solo si el usuario tiene uno de los roles especificados
- */
 export function RoleGuard({ roles, children, fallback = null }: RoleGuardProps) {
     const { hasRole } = useAuth();
     
@@ -26,9 +23,7 @@ interface PermissionGuardProps {
     fallback?: React.ReactNode;
 }
 
-/**
- * Componente para mostrar contenido basado en permisos específicos
- */
+
 export function PermissionGuard({ permission, children, fallback = null }: PermissionGuardProps) {
     const auth = useAuth();
     
@@ -44,13 +39,9 @@ interface ReadOnlyGuardProps {
     fallback?: React.ReactNode;
 }
 
-/**
- * Componente para mostrar contenido solo si el usuario NO es EMPLOYEE (solo lectura)
- */
 export function ReadOnlyGuard({ children, fallback = null }: ReadOnlyGuardProps) {
     const { hasRole } = useAuth();
     
-    // Todos excepto EMPLOYEE pueden hacer modificaciones
     if (!hasRole("EMPLOYEE")) {
         return <>{children}</>;
     }

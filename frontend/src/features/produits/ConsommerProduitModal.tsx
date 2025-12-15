@@ -7,10 +7,7 @@ type ConsommerProduitModalProps = {
     onClose: () => void;
 };
 
-export default function ConsommerProduitModal({
-                                                  produit,
-                                                  onClose,
-                                              }: ConsommerProduitModalProps) {
+export default function ConsommerProduitModal({produit,onClose,}: ConsommerProduitModalProps) {
     const [quantite, setQuantite] = useState("");
     const [motif, setMotif] = useState("Consommation cuisine");
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -18,7 +15,6 @@ export default function ConsommerProduitModal({
 
     if (!produit) return null;
 
-    // Obtenir configuration selon le type d'unité
     const getUnitConfig = (unite: string) => {
         switch (unite) {
             case 'PIECE':
@@ -41,8 +37,6 @@ export default function ConsommerProduitModal({
         setErrorMsg(null);
 
         const q = Number(quantite);
-
-        // ✅ Validaciones mejoradas
         if (!Number.isFinite(q) || q <= 0) {
             setErrorMsg("La quantité doit être supérieure à 0.");
             return;
@@ -58,7 +52,6 @@ export default function ConsommerProduitModal({
             return;
         }
 
-        // Valider la précision selon l'unité
         const decimals = (quantite.split('.')[1] || '').length;
         if (decimals > unitConfig.precision) {
             setErrorMsg(`Maximum ${unitConfig.precision} décimales pour cette unité.`);
@@ -70,12 +63,10 @@ export default function ConsommerProduitModal({
                 id: produit.id, 
                 data: { quantite: q, motif: motif.trim() } 
             });
-            // Reset et fermeture
             setQuantite("");
             setMotif("Consommation cuisine");
             onClose();
         } catch (err: unknown) {
-            // Gestion d'erreurs améliorée
             const error = err as { status?: number; data?: { message?: string } };
             if (error?.status === 400) {
                 setErrorMsg(

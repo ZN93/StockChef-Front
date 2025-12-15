@@ -59,7 +59,6 @@ export default function ProduitForm() {
 
         try {
             await createProduit.mutateAsync(payload);
-            // Reset form
             setNom("");
             setQuantiteInitiale("");
             setUnite("PIECE");

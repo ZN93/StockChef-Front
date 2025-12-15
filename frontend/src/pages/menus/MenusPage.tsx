@@ -6,7 +6,6 @@ export default function MenusPage() {
     return (
         <div className="grid grid-cols-1">
 
-            {/* --- Colonne droite : Liste des menus existants --- */}
             <div className="md:col-span-2 space-y-6">
                 <SectionCard
                     title="Menus récents"
@@ -16,7 +15,6 @@ export default function MenusPage() {
                 </SectionCard>
             </div>
 
-            {/* --- Colonne gauche : Formulaire de création --- */}
             <div className="md:col-span-1">
                 <SectionCard
                     title="Créer un menu"

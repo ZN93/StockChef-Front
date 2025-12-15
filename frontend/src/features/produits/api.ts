@@ -35,8 +35,6 @@ export function useCreateProduit() {
     });
 }
 
-/* Partie Consommer un produit */
-
 export type ConsommerPayload = {
     id: number;
     quantite: number;

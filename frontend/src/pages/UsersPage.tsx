@@ -4,7 +4,7 @@ import { apiClient } from "../api/client";
 import { PermissionGuard } from "../components/RoleGuard";
 import { useAuth } from "../auth/useAuth";
 
-// Types for user management
+
 interface User {
     id: string;
     email: string;
@@ -71,8 +71,7 @@ export default function UsersPage() {
     const [editingUser, setEditingUser] = useState<User | null>(null);
     const [error, setError] = useState<string>("");
     const [success, setSuccess] = useState<string>("");
-    
-    // Form states
+ 
     const [createForm, setCreateForm] = useState({
         firstName: "",
         lastName: "",
@@ -85,14 +84,12 @@ export default function UsersPage() {
         lastName: "",
         email: ""
     });
-    
-    // Get users query
+ 
     const { data: users = [], isLoading, error: usersError } = useQuery({
         queryKey: ["users"],
         queryFn: getUsersApi
     });
-    
-    // Mutations
+   
     const createUserMutation = useMutation({
         mutationFn: createUserApi,
         onSuccess: () => {

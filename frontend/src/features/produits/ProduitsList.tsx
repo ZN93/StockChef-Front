@@ -10,16 +10,13 @@ import type { Produit } from "./types";
 export default function ProduitsList() {
     const [query, setQuery] = useState("");
     const debounced = useDebounce(query, 350);
-    
-    // Usar backend real - obtiene todos los productos
+
     const { data: allProduits, isLoading, isError, isFetching } = useProduitsReal();
-    
-    // Filtrar en frontend por búsqueda
+
     const filteredProduits = allProduits?.filter(p => 
         !debounced || p.nom.toLowerCase().includes(debounced.toLowerCase())
     ) || [];
-    
-    // Simular paginación frontend
+
     const [page, setPage] = useState(0);
     const size = 20;
     const startIndex = page * size;
@@ -138,7 +135,6 @@ export default function ProduitsList() {
                                 </td>
                                 <td className="px-4 py-2 text-right">
                                     <div className="flex items-center justify-end gap-1">
-                                        {/* Botón Editar */}
                                         <button
                                             type="button"
                                             onClick={() => setProduitAEditer(p)}
@@ -147,8 +143,6 @@ export default function ProduitsList() {
                                         >
                                             Edit
                                         </button>
-                                        
-                                        {/* Botón Eliminar */}
                                         <button
                                             type="button"
                                             onClick={() => setProduitASupprimer(p)}
@@ -157,8 +151,6 @@ export default function ProduitsList() {
                                         >
                                             Delete
                                         </button>
-                                        
-                                        {/* Botón Consommer */}
                                         <button
                                             type="button"
                                             onClick={() => setProduitAConsommer(p)}
@@ -192,24 +184,18 @@ export default function ProduitsList() {
                 )}
                 </tbody>
             </table>
-
-            {/* Modal de consommation */}
             {produitAConsommer && (
                 <ConsommerProduitModal
                     produit={produitAConsommer}
                     onClose={() => setProduitAConsommer(null)}
                 />
             )}
-
-            {/* Modal d'édition */}
             {produitAEditer && (
                 <EditProduitModal
                     produit={produitAEditer}
                     onClose={() => setProduitAEditer(null)}
                 />
             )}
-
-            {/* Modal de suppression */}
             {produitASupprimer && (
                 <DeleteProduitModal
                     produit={produitASupprimer}

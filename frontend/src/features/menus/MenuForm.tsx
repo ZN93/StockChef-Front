@@ -27,13 +27,9 @@ export default function MenuForm() {
     const createMenu = useCreateMenu();
     const addIngredientToMenu = useAddIngredientToMenu();
 
-    // Charger productos reales del backend
     const { data: produits, isLoading: isProduitsLoading } = useProduitsReal();
     const produitsArray = produits || [];
 
-    console.log('✅ Produits récupérés:', produits?.length || 0);
-
-    // total live estimado
     const total = useMemo(
         () => items.reduce((acc, it) => acc + (Number(it.prixUnitaire) || 0) * (Number(it.quantite) || 0), 0),
         [items]
@@ -56,12 +52,7 @@ export default function MenuForm() {
         e.preventDefault();
         setErrors([]);
 
-        console.log('📝 Creating menu with payload:', {
-            nom, description, dateService, nombrePortions, prixVente, items: items.length
-        });
-
         try {
-            // Validaciones básicas
             if (!nom.trim()) {
                 setErrors(["Le nom du menu est requis"]);
                 return;
@@ -72,29 +63,27 @@ export default function MenuForm() {
                 return;
             }
 
-            console.log('🚀 Iniciando creación de menú...');
-
-            // 1. Crear el menú básico (sin ingredientes)
             const menuPayload: CreateMenuRequest = {
                 nom: nom.trim(),
                 description: description.trim() || undefined,
                 dateService,
                 nombrePortions: Number(nombrePortions) || 1,
-                prixVente: Number(prixVente) || undefined
+                prixVente: Number(prixVente) || undefined,
+                items: items.map((i) => ({
+                    produitId: i.produitId ?? 0,
+                    nom: i.nom,
+                    unite: i.unite,
+                    quantite: i.quantite,
+                    prixUnitaire: i.prixUnitaire,
+                })),
             };
 
             const newMenu = await createMenu.mutateAsync(menuPayload);
-            console.log('✅ Menu básico créé:', newMenu);
-
-            // 2. Agregar ingredientes uno por uno si los hay
             if (items.length > 0 && newMenu?.id) {
-                console.log('📝 Agregando', items.length, 'ingredientes al menú ID:', newMenu.id);
                 
                 for (let i = 0; i < items.length; i++) {
                     const item = items[i];
-                    console.log(`📌 Agregando ingrediente ${i + 1}/${items.length}:`, item.nom);
-                    
-                    // Mapear unidades del frontend a unidades válidas del backend
+
                     const mapUniteToBackend = (unite: string): string => {
                         switch (unite.toUpperCase()) {
                             case 'KG':
@@ -116,7 +105,7 @@ export default function MenuForm() {
                             case 'UNITES':
                                 return 'UNITE';
                             default:
-                                console.warn(`⚠️ Unidad no reconocida: ${unite}, usando PIECE por defecto`);
+                                console.warn(` ${unite}`);
                                 return 'PIECE';
                         }
                     };
@@ -128,29 +117,22 @@ export default function MenuForm() {
                         notes: `Ingredient: ${item.nom} - Prix unitaire: ${item.prixUnitaire}€`
                     };
                     
-                    console.log('🔍 Payload final para ingrediente:', ingredientPayload);
                     
                     try {
                         await addIngredientToMenu.mutateAsync({ 
                             menuId: newMenu.id, 
                             ingredient: ingredientPayload 
                         });
-                        console.log(`✅ Ingrediente ${i + 1} agregado:`, item.nom);
                     } catch (ingredientError: unknown) {
-                        console.error(`❌ Error agregando ingrediente ${i + 1} (${item.nom}):`, {
+                        console.error(` Error agregando ingrediente ${i + 1} (${item.nom}):`, {
                             error: ingredientError,
                             response: (ingredientError as unknown as {response?: {data?: unknown}})?.response?.data,
                             status: (ingredientError as unknown as {response?: {status?: number}})?.response?.status
                         });
-                        // Continuar con otros ingredientes
                     }
                 }
-                console.log('🎯 Todos los ingredientes procesados');
             }
 
-            console.log('✅ Menu créé, ingredientes agregados y confirmado automáticamente');
-
-            // Limpiar formulario
             setNom("");
             setDescription("");
             setDateService("");
@@ -159,20 +141,15 @@ export default function MenuForm() {
             setItems([]);
             setErrors([]);
 
-            console.log('🧹 Limpiando formulario...');
-
         } catch (error: unknown) {
-            console.error('❌ Error en creación de menú:', error);
+            console.error(error);
             const errorMessage = (error as unknown as {response?: {data?: {message?: string}}, message?: string})?.response?.data?.message || (error as unknown as {message?: string})?.message || "Erreur lors de la création du menu";
             setErrors([errorMessage]);
-            
-            console.log('🎉 Proceso completado exitosamente!');
         }
     };
 
     return (
         <form onSubmit={onSubmit} className="space-y-4">
-            {/* Erreurs */}
             {errors.length > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-md p-3">
                     <ul className="text-red-600 text-sm space-y-1">
@@ -180,8 +157,6 @@ export default function MenuForm() {
                     </ul>
                 </div>
             )}
-
-            {/* Champs de base */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -255,7 +230,6 @@ export default function MenuForm() {
                 </div>
             </div>
 
-            {/* Ingrédients */}
             <div>
                 <div className="flex items-center justify-between mb-3">
                     <h3 className="text-lg font-medium text-gray-900">

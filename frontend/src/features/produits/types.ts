@@ -1,18 +1,16 @@
-// Tipos actualizados para coincidir con backend real
 export type Produit = {
     id: number;
     nom: string;
-    quantiteStock: number; // Cambiado de 'quantite'
-    unite: 'KILOGRAMME' | 'PIECE' | 'LITRE' | 'GRAMME'; // Enum específico
+    quantiteStock: number;
+    unite: 'KILOGRAMME' | 'PIECE' | 'LITRE' | 'GRAMME';
     prixUnitaire: number;
-    seuilAlerte: number; // Nuevo campo
-    datePeremption: string; // ISO string
-    description: string; // Nuevo campo
+    seuilAlerte: number;
+    datePeremption: string;
+    description: string;
     dateCreation?: string;
     dateModification?: string;
 };
 
-// Para compatibilidad con el componente de lista (si es necesario)
 export type Page<T> = {
     content: T[];
     page: number;
@@ -20,33 +18,29 @@ export type Page<T> = {
     totalElements: number;
 };
 
-// Tipo para crear nuevos productos
 export type NewProduit = {
     nom: string;
-    quantiteInitiale: number; // Para creación
+    quantiteInitiale: number;
     unite: 'KILOGRAMME' | 'PIECE' | 'LITRE' | 'GRAMME';
     prixUnitaire: number;
     seuilAlerte: number;
-    datePeremption: string; // Requerido
-    description: string; // Requerido
+    datePeremption: string;
+    description: string;
 };
 
-// Tipo para consumir productos
 export type ConsommerProduitRequest = {
     quantite: number;
     motif?: string;
 };
 
-// Tipo para editar productos (todos los campos opcionales según API)
 export type EditProduitRequest = {
     nom?: string;
     prixUnitaire?: number;
     seuilAlerte?: number;
-    datePeremption?: string; // YYYY-MM-DD
+    datePeremption?: string;
     description?: string;
 };
 
-// Tipo para resumen de inventario
 export type InventorySummary = {
     totalProduits: number;
     totalCategories: number;

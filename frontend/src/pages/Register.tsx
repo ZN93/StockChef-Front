@@ -28,7 +28,6 @@ export default function RegisterPage() {
         setError(null);
         setSuccess(null);
 
-        // Validation
         if (!formData.firstName.trim()) {
             setError("Le prénom est requis");
             return;
@@ -58,16 +57,14 @@ export default function RegisterPage() {
         try {
             await registerApi(formData);
             setSuccess("Compte créé avec succès ! Vous allez être redirigé vers la page de connexion...");
-            
-            // Redirect to login after 2 seconds
+
             setTimeout(() => {
                 navigate("/login", { replace: true });
             }, 2000);
         } catch (err: unknown) {
             console.error("Erreur lors de l'inscription:", err);
-            
-            // Handle specific error messages
-            const error = err as { response?: { status?: number } }; // Type for axios error
+
+            const error = err as { response?: { status?: number } };
             if (error.response?.status === 409) {
                 setError("Un compte avec cet email existe déjà");
             } else if (error.response?.status === 400) {

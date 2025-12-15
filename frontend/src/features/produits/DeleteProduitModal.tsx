@@ -7,16 +7,12 @@ type DeleteProduitModalProps = {
     onClose: () => void;
 };
 
-export default function DeleteProduitModal({
-                                               produit,
-                                               onClose,
-                                           }: DeleteProduitModalProps) {
+export default function DeleteProduitModal({produit,onClose,}: DeleteProduitModalProps) {
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const mutation = useDeleteProduit();
 
     if (!produit) return null;
 
-    // Obtenir configuration selon le type d'unité
     const getUnitConfig = (unite: string) => {
         switch (unite) {
             case 'PIECE':
@@ -58,8 +54,6 @@ export default function DeleteProduitModal({
         setErrorMsg(null);
         onClose();
     };
-
-    // Vérifier si le produit a du stock
     const hasStock = produit.quantiteStock > 0;
     const isLowStock = produit.quantiteStock <= produit.seuilAlerte;
 

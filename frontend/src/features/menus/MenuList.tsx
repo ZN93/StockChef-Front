@@ -23,16 +23,13 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [actionsModalOpen, setActionsModalOpen] = useState(false);
-    
-    // Estados para filtros
+
     const [viewMode, setViewMode] = useState<"all" | "realizable">("all");
     const [selectedDate, setSelectedDate] = useState<string>("");
 
-    // Hooks para diferentes vistas
     const { data: allMenus, isLoading: isLoadingAll, isError: isErrorAll } = useMenus({ page: 0, size: 20 });
     const { data: realizableMenus, isLoading: isLoadingRealizable } = useMenusRealisables(selectedDate);
 
-    // Determinar qué datos mostrar
     const getCurrentData = () => {
         switch (viewMode) {
             case "realizable":
@@ -46,7 +43,6 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
     const isLoading = isLoadingAll || (viewMode === "realizable" && isLoadingRealizable);
     const isError = isErrorAll;
 
-    // Manejadores de filtros
     const handleDateFilter = (date: string) => {
         setSelectedDate(date);
         setViewMode(date ? "realizable" : "all");
@@ -64,7 +60,6 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
     if (rows.length === 0) {
         return (
             <div className="space-y-6">
-                {/* Header con filtros */}
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div className="flex-1">
@@ -73,7 +68,6 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
                         </div>
                         
                         <div className="flex flex-col sm:flex-row gap-4">
-                            {/* Filtro por fecha */}
                             <div className="flex gap-2">
                                 <input
                                     type="date"
@@ -105,7 +99,6 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
 
     return (
         <div className="space-y-6">
-            {/* Header con filtros */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="flex-1">
@@ -117,7 +110,6 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
                     </div>
                     
                     <div className="flex flex-col sm:flex-row gap-4">
-                        {/* Filtro por fecha */}
                         <div className="flex gap-2">
                             <input
                                 type="date"
@@ -143,7 +135,6 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
                 </div>
             </div>
 
-            {/* Tabla de menús */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div className="px-6 py-4 border-b border-gray-200">
                     <div className="flex items-center justify-between">
@@ -184,7 +175,6 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
                             ANNULE: "bg-red-100 text-red-800"
                         }[menu.statut] || "bg-gray-100 text-gray-800";
                         
-                        // Estilo de fila basado en presupuesto
                         const rowClassName = depasse ? "bg-red-50 border-l-4 border-red-400" : "";
 
                         return (
@@ -279,7 +269,6 @@ export default function MenuList({ seuilBudget = 15 }: Props) {
                 </div>
             )}
 
-            {/* Modales */}
             <EditMenuModal 
                 menuId={selectedMenu?.id || 0}
                 isOpen={editModalOpen}

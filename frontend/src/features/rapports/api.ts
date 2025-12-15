@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../../api/client.ts";
+import { apiClient } from "../../api/client";
 
 
 export type RapportItem = {
@@ -21,7 +21,7 @@ export function useRapports(params: { from: string; to: string }) {
         queryKey: ["rapports", params],
         queryFn: async () => {
             const { from, to } = params;
-            const { data } = await api.get<RapportResponse>("/rapports", {
+            const { data } = await apiClient.get<RapportResponse>("/rapports", {
                 params: { from, to },
             });
             return data;

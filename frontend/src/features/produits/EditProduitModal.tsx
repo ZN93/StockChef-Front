@@ -7,10 +7,7 @@ type EditProduitModalProps = {
     onClose: () => void;
 };
 
-export default function EditProduitModal({
-                                             produit,
-                                             onClose,
-                                         }: EditProduitModalProps) {
+export default function EditProduitModal({produit,onClose,}: EditProduitModalProps) {
     const [nom, setNom] = useState(produit?.nom || "");
     const [prixUnitaire, setPrixUnitaire] = useState(produit?.prixUnitaire?.toString() || "");
     const [seuilAlerte, setSeuilAlerte] = useState(produit?.seuilAlerte?.toString() || "");
@@ -21,7 +18,6 @@ export default function EditProduitModal({
 
     if (!produit) return null;
 
-    // Obtenir configuration selon le type d'unité
     const getUnitConfig = (unite: string) => {
         switch (unite) {
             case 'PIECE':
@@ -43,7 +39,6 @@ export default function EditProduitModal({
         e.preventDefault();
         setErrorMsg(null);
 
-        // Validations
         if (!nom.trim()) {
             setErrorMsg("Le nom est requis.");
             return;
@@ -71,7 +66,6 @@ export default function EditProduitModal({
             return;
         }
 
-        // Vérifier si date de péremption est dans le futur
         const today = new Date().toISOString().split('T')[0];
         if (datePeremption < today) {
             setErrorMsg("La date de péremption ne peut pas être dans le passé.");
@@ -80,15 +74,13 @@ export default function EditProduitModal({
 
         try {
             const payload: EditProduitRequest = {};
-            
-            // Seulement envoyer les champs qui ont changé
+
             if (nom.trim() !== produit.nom) payload.nom = nom.trim();
             if (prix !== produit.prixUnitaire) payload.prixUnitaire = prix;
             if (seuil !== produit.seuilAlerte) payload.seuilAlerte = seuil;
             if (datePeremption !== produit.datePeremption) payload.datePeremption = datePeremption;
             if (description.trim() !== produit.description) payload.description = description.trim();
 
-            // Si no hay cambios, no hacer request
             if (Object.keys(payload).length === 0) {
                 setErrorMsg("Aucune modification détectée.");
                 return;
@@ -115,7 +107,7 @@ export default function EditProduitModal({
     };
 
     const handleCancel = () => {
-        // Reset aux valeurs originales
+
         setNom(produit.nom);
         setPrixUnitaire(produit.prixUnitaire.toString());
         setSeuilAlerte(produit.seuilAlerte.toString());

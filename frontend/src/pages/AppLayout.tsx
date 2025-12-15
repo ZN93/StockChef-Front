@@ -12,15 +12,12 @@ export default function AppLayout() {
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
-            {/* NAVBAR HAUT */}
             <header className="sticky top-0 z-10 bg-white/80 backdrop-blur border-b">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-4">
-                    {/* Logo / titre */}
                     <div className="text-lg sm:text-xl font-bold tracking-tight">
                         StockChef App
                     </div>
 
-                    {/* Liens de navigation */}
                     <nav className="flex-1 flex justify-center">
                         <div className="flex gap-1 overflow-x-auto">
                             <NavLink
@@ -33,7 +30,6 @@ export default function AppLayout() {
                                 Tableau de bord
                             </NavLink>
 
-                            {/* Tout le monde voit Produits */}
                             <NavLink
                                 to="/app/produits"
                                 className={({isActive}) =>
@@ -67,7 +63,6 @@ export default function AppLayout() {
                             )}
                             */}
 
-                            {/* Alertes pour tout le monde */}
                             <NavLink
                                 to="/app/alertes"
                                 className={({isActive}) =>
@@ -77,7 +72,6 @@ export default function AppLayout() {
                                 Alertes
                             </NavLink>
 
-                            {/* Gestión de usuarios solo para ADMIN/DEVELOPER */}
                             {canManageUsers() && (
                                 <NavLink
                                     to="/app/usuarios"
@@ -91,7 +85,6 @@ export default function AppLayout() {
                         </div>
                     </nav>
 
-                    {/* Infos utilisateur + logout */}
                     <div className="flex items-center gap-3">
                         <div className="text-xs sm:text-sm text-gray-600 text-right">
                             <div className="font-medium">
@@ -124,7 +117,6 @@ export default function AppLayout() {
                 </div>
             </header>
 
-            {/* CONTENU PRINCIPAL */}
             <main className="flex-1">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
                     <Outlet/>

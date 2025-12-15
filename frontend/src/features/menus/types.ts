@@ -1,4 +1,3 @@
-// Estructura de ingrediente de menú según API
 export type MenuIngredient = {
     id: number;
     produitId: number;
@@ -12,7 +11,6 @@ export type MenuIngredient = {
     quantiteManquante?: number;
 };
 
-// Estructura de menú según API
 export type Menu = {
     id: number;
     nom: string;
@@ -33,7 +31,6 @@ export type Menu = {
     chefResponsable?: string;
 };
 
-// Para crear un nuevo menú
 export type CreateMenuRequest = {
     nom: string;
     description?: string;
@@ -41,9 +38,15 @@ export type CreateMenuRequest = {
     nombrePortions?: number;
     prixVente?: number;
     chefResponsable?: string;
+    items: Array<{
+        produitId: number;
+        nom: string;
+        unite: string;
+        quantite: number;
+        prixUnitaire: number;
+    }>;
 };
 
-// Para editar un menú
 export type EditMenuRequest = {
     nom: string;
     description?: string;
@@ -53,7 +56,6 @@ export type EditMenuRequest = {
     chefResponsable?: string;
 };
 
-// Para agregar ingredientes a un menú
 export type AddIngredientRequest = {
     produitId: number;
     quantiteNecessaire: number;

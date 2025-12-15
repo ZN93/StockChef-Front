@@ -97,7 +97,6 @@ export default function MenuActionsModal({ menu, isOpen, onClose }: Props) {
                     )}
 
                     <div className="space-y-4">
-                        {/* Actions disponibles selon le statut */}
                         {isBrouillon && (
                             <div>
                                 <h4 className="font-medium text-gray-700 mb-2">Actions disponibles:</h4>
@@ -143,8 +142,6 @@ export default function MenuActionsModal({ menu, isOpen, onClose }: Props) {
                                 </p>
                             </div>
                         )}
-
-                        {/* Informations sur l'impact sur le stock */}
                         {menu.ingredients && menu.ingredients.length > 0 && (
                             <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
                                 <h4 className="text-sm font-medium text-yellow-800 mb-1">💡 Impact sur le stock:</h4>

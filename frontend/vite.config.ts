@@ -7,10 +7,10 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "https://stockchef-back.onrender.com", // Backend en Render
+        target: "https://stockchef-back.onrender.com", 
         changeOrigin: true,
         secure: true,
-        rewrite: (path) => path, // Mantener el path como está
+        rewrite: (path) => path, 
       },
     },
   },

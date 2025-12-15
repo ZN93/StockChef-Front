@@ -13,7 +13,6 @@ import {
 const SEUIL_BUDGET = 4.5;
 
 export default function AlertesPage() {
-    // Hooks pour obtenir les données d'alertes
     const { data: expiredProducts, isLoading: isExpiredLoading } = useExpiredProducts();
     const { data: expiringProducts, isLoading: isExpiringLoading } = useExpiringProducts();
     const { data: stockAlerts, isLoading: isStockLoading } = useStockAlerts();
@@ -22,7 +21,6 @@ export default function AlertesPage() {
     const isLoading = isExpiredLoading || isExpiringLoading || isStockLoading || isMenuLoading;
     return (
         <div className="space-y-6 p-4">
-            {/* Loading state */}
             {isLoading && (
                 <div className="text-center py-8">
                     <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-2"></div>
@@ -31,10 +29,8 @@ export default function AlertesPage() {
             )}
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                {/* ------------------ Péremption & Stock ------------------ */}
                 <SectionCard title="Péremption & Stock">
                     <div className="space-y-4">
-                        {/* Produits périmés */}
                         {expiredProducts && expiredProducts.length > 0 && (
                             <div>
                                 <h4 className="font-medium text-red-600 mb-2">Produits périmés</h4>
@@ -55,8 +51,6 @@ export default function AlertesPage() {
                                 </ul>
                             </div>
                         )}
-
-                        {/* Produits proche péremption */}
                         {expiringProducts && expiringProducts.length > 0 && (
                             <div>
                                 <h4 className="font-medium text-orange-600 mb-2">Proche péremption</h4>
@@ -85,8 +79,6 @@ export default function AlertesPage() {
                                 </ul>
                             </div>
                         )}
-
-                        {/* Stock faible */}
                         {stockAlerts && stockAlerts.length > 0 && (
                             <div>
                                 <h4 className="font-medium text-yellow-600 mb-2">Stock faible</h4>
@@ -107,8 +99,6 @@ export default function AlertesPage() {
                                 </ul>
                             </div>
                         )}
-
-                        {/* Aucune alerte */}
                         {!isLoading && 
                          (!expiredProducts?.length && !expiringProducts?.length && !stockAlerts?.length) && (
                             <div className="text-center py-8 text-gray-500">
@@ -118,8 +108,6 @@ export default function AlertesPage() {
                         )}
                     </div>
                 </SectionCard>
-
-                {/* ------------------ Budget Menus ------------------ */}
                 <SectionCard title="Budget Menus">
                     <div className="space-y-4">
                         {menuBudgetAlerts && menuBudgetAlerts.length > 0 ? (
@@ -168,8 +156,6 @@ export default function AlertesPage() {
                     </div>
                 </SectionCard>
             </div>
-
-            {/* Statistiques résumé */}
             {!isLoading && (
                 <SectionCard title="Résumé des Alertes">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">

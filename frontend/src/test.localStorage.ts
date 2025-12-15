@@ -1,14 +1,11 @@
-// src/test.localStorage.ts
+
 import { vi } from "vitest";
 
 declare global {
-    // On ajoute le type dans le global pour TS
-    // (Node 22 donne un truc bizarre)
      
     var localStorage: Storage;
 }
 
-// Si localStorage est absent ou cassé → on remplace
 if (
     typeof globalThis.localStorage === "undefined" ||
     typeof globalThis.localStorage.getItem !== "function"

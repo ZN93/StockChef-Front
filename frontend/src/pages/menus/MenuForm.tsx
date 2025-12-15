@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useCreateMenu} from "../../features/menus/api.ts";
-import type { NewMenu} from "../../features/menus/types.ts";
+import type { CreateMenuRequest } from "../../features/menus/types.ts";
 import { useProduitOptions} from "../../features/produits/api-options.ts";
 
 const formatEUR = (n: number) =>
@@ -8,7 +8,6 @@ const formatEUR = (n: number) =>
         n || 0
     );
 
-// seuil de budget par repas (en €) – à terme pourra venir du backend / config
 const BUDGET_SEUIL = 4.5;
 
 type ItemDraft = {
@@ -19,13 +18,14 @@ type ItemDraft = {
     quantite: number;
 };
 
+
 export default function MenuForm() {
     const [nom, setNom] = useState("");
+    const [dateService, setDateService] = useState(() => new Date().toISOString().slice(0, 10));
     const [items, setItems] = useState<ItemDraft[]>([]);
     const [errors, setErrors] = useState<string[]>([]);
     const createMenu = useCreateMenu();
 
-    // total live
     const total = useMemo(
         () =>
             items.reduce(
@@ -39,7 +39,6 @@ export default function MenuForm() {
 
     const depasseBudget = total > BUDGET_SEUIL;
 
-    // Charger options produits (simple : 1ère page; on peut filtrer plus tard)
     const { data: produits = [] } = useProduitOptions();
 
     const addItem = () => {
@@ -53,7 +52,6 @@ export default function MenuForm() {
                 quantite: 0,
             },
         ]);
-        // nettoie l'erreur "Au moins un ingrédient"
         setErrors((prev) =>
             prev.filter((e) => e.toLowerCase() !== "au moins un ingrédient")
         );
@@ -63,7 +61,6 @@ export default function MenuForm() {
         setItems((prev) =>
             prev.map((it, i) => (i === idx ? { ...it, ...patch } : it))
         );
-        // si on rend une quantité > 0, on nettoie l'erreur correspondante
         if (patch.quantite !== undefined && patch.quantite > 0) {
             setErrors((prev) =>
                 prev.filter((e) => e.toLowerCase() !== "chaque quantité doit être > 0")
@@ -86,6 +83,7 @@ export default function MenuForm() {
     const validate = () => {
         const err: string[] = [];
         if (!nom.trim()) err.push("Le nom est requis");
+        if (!dateService) err.push("La date de service est requise");
         if (items.length === 0) err.push("Au moins un ingrédient");
         if (items.some((i) => !(i.quantite > 0)))
             err.push("Chaque quantité doit être > 0");
@@ -97,10 +95,12 @@ export default function MenuForm() {
         e.preventDefault();
         if (!validate()) return;
 
-        const payload: NewMenu = {
+
+        const payload: CreateMenuRequest = {
             nom,
+            dateService,
             items: items.map((i) => ({
-                produitId: i.produitId ?? 0, // 0 si libre; quand un produit est choisi, on a un vrai id
+                produitId: i.produitId ?? 0,
                 nom: i.nom,
                 unite: i.unite,
                 quantite: i.quantite,
@@ -120,10 +120,7 @@ export default function MenuForm() {
 
     return (
         <form onSubmit={onSubmit} className="max-w-xl space-y-4">
-            {/* Titre local (le SectionCard de MenusPage a déjà son propre titre, mais ça ne gêne pas) */}
             <h2 className="text-xl font-semibold">Créer un menu</h2>
-
-            {/* Bandeau budget comme la maquette */}
             <div
                 data-testid="menu-budget-banner"
                 className={`flex flex-col gap-1 rounded-2xl border px-3 py-2 text-sm
@@ -168,6 +165,26 @@ export default function MenuForm() {
                 />
             </label>
 
+            <label className="block space-y-1">
+                <span className="text-sm text-gray-700">Date de service</span>
+                <input
+                    type="date"
+                    aria-label="Date de service"
+                    value={dateService}
+                    onChange={(e) => {
+                        setDateService(e.target.value);
+                        if (e.target.value) {
+                            setErrors((prev) =>
+                                prev.filter(
+                                    (err) => err.toLowerCase() !== "la date de service est requise"
+                                )
+                            );
+                        }
+                    }}
+                    className="border rounded-xl px-3 py-2 w-full text-sm"
+                />
+            </label>
+
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">Ingrédients</span>
@@ -192,7 +209,6 @@ export default function MenuForm() {
                             key={idx}
                             className="grid grid-cols-12 gap-2 items-end rounded-xl bg-gray-50/60 p-3"
                         >
-                            {/* Sélecteur produit */}
                             <label className="col-span-4 space-y-1">
                 <span className="text-xs text-gray-500">
                   Produit #{idx + 1}
@@ -212,7 +228,6 @@ export default function MenuForm() {
                                 </select>
                             </label>
 
-                            {/* Unité (auto-remplie mais éditable) */}
                             <label className="col-span-2 space-y-1">
                 <span className="text-xs text-gray-500">
                   Unité ingrédient #{idx + 1}
@@ -224,8 +239,6 @@ export default function MenuForm() {
                                     className="border rounded-xl px-2 py-1.5 w-full text-sm"
                                 />
                             </label>
-
-                            {/* Prix unitaire */}
                             <label className="col-span-3 space-y-1">
                 <span className="text-xs text-gray-500">
                   Prix unitaire ingrédient #{idx + 1}
@@ -243,8 +256,6 @@ export default function MenuForm() {
                                     className="border rounded-xl px-2 py-1.5 w-full text-sm"
                                 />
                             </label>
-
-                            {/* Quantité */}
                             <label className="col-span-3 space-y-1">
                 <span className="text-xs text-gray-500">
                   Quantité #{idx + 1}

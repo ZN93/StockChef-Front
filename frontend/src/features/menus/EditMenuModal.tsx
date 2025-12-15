@@ -23,7 +23,6 @@ export default function EditMenuModal({ menuId, isOpen, onClose }: Props) {
     const [errors, setErrors] = useState<string[]>([]);
     const [isFormInitialized, setIsFormInitialized] = useState(false);
 
-    // Initialiser le formulaire avec les données du menu
     useEffect(() => {
         if (menu && !isFormInitialized) {
             setFormData({
@@ -38,7 +37,6 @@ export default function EditMenuModal({ menuId, isOpen, onClose }: Props) {
         }
     }, [menu, isFormInitialized]);
 
-    // Réinitialiser quand on ferme/ouvre
     useEffect(() => {
         if (!isOpen) {
             setIsFormInitialized(false);
@@ -72,7 +70,6 @@ export default function EditMenuModal({ menuId, isOpen, onClose }: Props) {
             return;
         }
 
-        // Vérifier que la date n'est pas dans le passé
         const serviceDate = new Date(formData.dateService);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -93,8 +90,7 @@ export default function EditMenuModal({ menuId, isOpen, onClose }: Props) {
                 nom: formData.nom.trim(),
                 description: formData.description?.trim() || undefined,
             });
-            
-            // Reset form state
+
             setIsFormInitialized(false);
             setErrors([]);
             
@@ -227,8 +223,6 @@ export default function EditMenuModal({ menuId, isOpen, onClose }: Props) {
                                     />
                                 </div>
                             </div>
-
-                            {/* Informations sur les ingrédients */}
                             {menu.ingredients && menu.ingredients.length > 0 && (
                                 <div className="bg-gray-50 p-4 rounded-md">
                                     <h3 className="font-medium text-gray-700 mb-2">Ingrédients actuels:</h3>

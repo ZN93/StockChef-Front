@@ -21,11 +21,11 @@ const router = createBrowserRouter([
             {
                 element: <AppLayout />,
                 children: [
-                    { index: true, element: <DashboardPage /> }, // page par défaut
+                    { index: true, element: <DashboardPage /> }, 
                     { path: "produits", element: <ProduitsPage /> },
                     { path: "menus", element: <MenusPage /> },
                     { path: "alertes", element: <AlertesPage /> },
-                    { path: "rapports", element: <Navigate to="/app" replace /> }, // Redireccionar hasta que funcionen los endpoints
+                    { path: "rapports", element: <Navigate to="/app" replace /> },
                     { path: "profile", element: <Profile /> },
                     { path: "usuarios", element: <UsersPage /> },
                 ],

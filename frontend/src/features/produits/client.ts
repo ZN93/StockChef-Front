@@ -1,4 +1,14 @@
-export async function client(url: string, options: RequestInit = {}) {
+export class HttpError extends Error {
+    status: number;
+    data: unknown;
+    constructor(message: string, status: number, data: unknown) {
+        super(message);
+        this.status = status;
+        this.data = data;
+    }
+}
+
+export async function client<T = unknown>(url: string, options: RequestInit = {}): Promise<T> {
     const res = await fetch(url, {
         headers: {
             "Content-Type": "application/json",
@@ -7,10 +17,9 @@ export async function client(url: string, options: RequestInit = {}) {
         ...options,
     });
 
-    // on ne fait pas res.json() directement pour pouvoir gérer les erreurs HTTP
     const text = await res.text();
 
-    let data: any = null;
+    let data: unknown = null;
     try {
         data = text ? JSON.parse(text) : null;
     } catch {
@@ -18,11 +27,8 @@ export async function client(url: string, options: RequestInit = {}) {
     }
 
     if (!res.ok) {
-        const error: any = new Error("HTTP error");
-        error.status = res.status;
-        error.data = data;
-        throw error;
+        throw new HttpError("HTTP error", res.status, data);
     }
 
-    return data;
+    return data as T;
 }

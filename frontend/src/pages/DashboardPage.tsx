@@ -20,19 +20,15 @@ const formatDate = (dateStr: string) => {
 };
 
 export default function DashboardPage() {
-    // Hooks pour obtenir les données réelles
     const { data: summary, isLoading: isSummaryLoading, isError: isSummaryError } = useDashboardSummary();
     const { data: alerts, isLoading: isAlertsLoading } = useProductsInAlert();
     const { isLoading: isExpiringLoading } = useExpiringProducts(JOURS_PEREMPTION);
     const { data: recentProducts, isLoading: isRecentLoading } = useRecentProducts(5);
 
-    // Calculer les KPIs
     const kpis = calculateDashboardKPIs(summary, alerts);
 
-    // État de chargement global
     const isLoading = isSummaryLoading || isAlertsLoading || isExpiringLoading || isRecentLoading;
 
-    // Gérer les erreurs
     if (isSummaryError) {
         return (
             <div className="grid place-items-center h-64">
@@ -44,7 +40,6 @@ export default function DashboardPage() {
         );
     }
 
-    // Affichage de chargement
     if (isLoading) {
         return (
             <div className="grid place-items-center h-64">

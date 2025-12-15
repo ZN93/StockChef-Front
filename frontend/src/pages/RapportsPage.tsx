@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../api/client";
 import { useAuth } from "../auth/useAuth";
 
-// Tipos para los datos reales de la API
 type InventorySummary = {
     totalProducts: number;
     totalValue: number;
@@ -33,14 +32,12 @@ type DashboardData = {
     timestamp: string;
 };
 
-// Petit helper pour l'affichage des montants
 const formatEUR = (n: number | undefined) =>
     new Intl.NumberFormat("fr-FR", {
         style: "currency",
         currency: "EUR",
     }).format(n ?? 0);
 
-// Hooks para obtener datos reales
 const useInventorySummary = () => {
     return useQuery({
         queryKey: ['reports', 'inventory-summary'],
@@ -76,13 +73,11 @@ const useDashboardReport = () => {
 
 export default function RapportsPage() {
     const { canManageInventory } = useAuth();
-    
-    // Obtener datos reales de la API
+
     const { data: inventorySummary, isLoading: isInventoryLoading, isError: isInventoryError } = useInventorySummary();
     const { data: allProducts, isLoading: isProductsLoading, isError: isProductsError } = useAllProducts();
     const { data: dashboardData, isLoading: isDashboardLoading, isError: isDashboardError } = useDashboardReport();
 
-    // Si el usuario no tiene permisos, no mostrar la página
     if (!canManageInventory()) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -96,7 +91,6 @@ export default function RapportsPage() {
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-4">
-            {/* ----------------- Resumen de Inventario ----------------- */}
             <SectionCard title="Resumen de Inventario">
                 {isInventoryLoading && <div className="text-sm text-gray-500">Cargando...</div>}
                 {isInventoryError && (
@@ -127,7 +121,6 @@ export default function RapportsPage() {
                 )}
             </SectionCard>
 
-            {/* ----------------- Estado del Sistema ----------------- */}
             <SectionCard title="Estado del Sistema">
                 {isDashboardLoading && <div className="text-sm text-gray-500">Cargando...</div>}
                 {isDashboardError && (
@@ -155,7 +148,6 @@ export default function RapportsPage() {
                 )}
             </SectionCard>
 
-            {/* ----------------- Productos por Categoría ----------------- */}
             <SectionCard title="Análisis por Categorías">
                 {isInventoryLoading && <div className="text-sm text-gray-500">Cargando...</div>}
                 {isInventoryError && (
@@ -185,7 +177,6 @@ export default function RapportsPage() {
                 )}
             </SectionCard>
 
-            {/* ----------------- Lista de Productos Críticos ----------------- */}
             <SectionCard title="Productos Críticos">
                 {isProductsLoading && <div className="text-sm text-gray-500">Cargando...</div>}
                 {isProductsError && (
@@ -245,7 +236,6 @@ export default function RapportsPage() {
                 )}
             </SectionCard>
 
-            {/* ----------------- Estadísticas Rápidas ----------------- */}
             <SectionCard title="Estadísticas Rápidas">
                 {(isInventoryLoading || isProductsLoading) && <div className="text-sm text-gray-500">Cargando...</div>}
                 {(isInventoryError || isProductsError) && (
@@ -278,7 +268,6 @@ export default function RapportsPage() {
                 )}
             </SectionCard>
 
-            {/* ----------------- Acciones ----------------- */}
             <SectionCard title="Acciones">
                 <div className="space-y-2">
                     <button 
