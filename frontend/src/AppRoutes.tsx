@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import RouteGuard from "./auth/RouteGuard";
 import LoginPage from "./pages/Login.tsx";
@@ -9,7 +9,6 @@ import AppLayout from "./pages/AppLayout";
 import ProduitsPage from "./pages/produits/ProduitsPage";
 import MenusPage from "./pages/menus/MenusPage";
 import AlertesPage from "./pages/AlertesPage";
-import RapportsPage from "./pages/RapportsPage";
 import DashboardPage from "./pages/DashboardPage.tsx";
 
 const router = createBrowserRouter([
@@ -26,7 +25,7 @@ const router = createBrowserRouter([
                     { path: "produits", element: <ProduitsPage /> },
                     { path: "menus", element: <MenusPage /> },
                     { path: "alertes", element: <AlertesPage /> },
-                    { path: "rapports", element: <RapportsPage /> }, // RouteGuard + hasRole feront le reste
+                    { path: "rapports", element: <Navigate to="/app" replace /> }, // Redireccionar hasta que funcionen los endpoints
                     { path: "profile", element: <Profile /> },
                     { path: "usuarios", element: <UsersPage /> },
                 ],

@@ -52,8 +52,8 @@ export default function AppLayout() {
                                 Menus
                             </NavLink>
 
-                            {/* Menus + Rapports réservés ADMIN */}
-                            {hasRole("ADMIN") && (
+                            {/* Rapports temporalmente deshabilitados - endpoints no funcionan (500 errors)
+                            {(hasRole("ADMIN") || hasRole("CHEF") || hasRole("DEVELOPER")) && (
                                 <>
                                     <NavLink
                                         to="/app/rapports"
@@ -65,6 +65,7 @@ export default function AppLayout() {
                                     </NavLink>
                                 </>
                             )}
+                            */}
 
                             {/* Alertes pour tout le monde */}
                             <NavLink
