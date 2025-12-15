@@ -4,7 +4,7 @@ import {
     useQueryClient,
     keepPreviousData,
 } from "@tanstack/react-query";
-import { api } from "../../api/client";
+import { apiClient } from "../../api/client";
 import type { Page, Produit, NewProduit } from "./types";
 
 export type UseProduitsParams = {
@@ -17,14 +17,7 @@ export function useProduits({ page, size, search }: UseProduitsParams) {
     return useQuery({
         queryKey: ["produits", { page, size, search }],
         queryFn: async () => {
-            console.log("[RQ] GET /produits ", {
-                baseURL: api.defaults.baseURL,
-                page,
-                size,
-                search,
-            });
-
-            const resp = await api.get<Page<Produit>>("/produits", {
+            const resp = await apiClient.get<Page<Produit>>("/produits", {
                 params: { page, size, search },
             });
             return resp.data;
@@ -37,7 +30,7 @@ export function useCreateProduit() {
     const qc = useQueryClient();
     return useMutation({
         mutationFn: async (payload: NewProduit) =>
-            (await api.post("/produits", payload)).data as Produit,
+            (await apiClient.post("/produits", payload)).data as Produit,
         onSuccess: () => qc.invalidateQueries({ queryKey: ["produits"] }),
     });
 }
@@ -51,10 +44,9 @@ export type ConsommerPayload = {
 
 export function useConsommerProduit() {
     const qc = useQueryClient();
-
     return useMutation({
         mutationFn: async ({ id, quantite }: ConsommerPayload) => {
-            await api.patch(`/produits/${id}/stock`, { quantite });
+            await apiClient.patch(`/produits/${id}/stock`, { quantite });
         },
         onSuccess: () => {
             qc.invalidateQueries({

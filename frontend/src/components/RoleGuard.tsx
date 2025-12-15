@@ -1,5 +1,5 @@
 import React from "react";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 
 interface RoleGuardProps {
     roles: Array<"ADMIN" | "DEVELOPER" | "CHEF" | "EMPLOYEE">;

@@ -1,38 +1,12 @@
-import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useState,
-} from "react";
+
+import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { loginApi } from "./api";
 import type { LoginResponse } from "./api";
+import type { AuthState } from "./AuthContextValue";
+import { AuthContext } from "./AuthContextInstance";
+import type { SimpleRole } from "./roles.ts";
 
-type SimpleRole = "ADMIN" | "USER" | "DEVELOPER" | "CHEF" | "EMPLOYEE";
-
-type AuthState = {
-    token: string | null;
-    email: string | null;
-    fullName: string | null;
-    role: SimpleRole | null;
-};
-
-type AuthContextValue = {
-    auth: AuthState;
-    user: AuthState; // Alias para compatibilidad
-    login: (email: string, password: string) => Promise<void>;
-    logout: () => void;
-    hasRole: (...roles: SimpleRole[]) => boolean;
-    isAdmin: () => boolean;
-    isChef: () => boolean;
-    isDeveloper: () => boolean;
-    canManageInventory: () => boolean;
-    canManageMenus: () => boolean;
-    canManageUsers: () => boolean;
-};
-
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 const STORAGE_KEY = "stockchef_auth";
 
@@ -50,7 +24,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!raw) return { token: null, email: null, fullName: null, role: null };
         try {
             return JSON.parse(raw) as AuthState;
-        } catch {
+        } catch (error) {
+            void error;
             return { token: null, email: null, fullName: null, role: null };
         }
     });
@@ -85,12 +60,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         [auth.role]
     );
 
-    // Role-specific helper functions
     const isAdmin = useCallback(() => hasRole("ADMIN"), [hasRole]);
     const isChef = useCallback(() => hasRole("CHEF"), [hasRole]);
     const isDeveloper = useCallback(() => hasRole("DEVELOPER"), [hasRole]);
 
-    // Permission helper functions
     const canManageInventory = useCallback(
         () => hasRole("DEVELOPER", "ADMIN", "CHEF"),
         [hasRole]
@@ -107,11 +80,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     return (
-        <AuthContext.Provider value={{ 
-            auth, 
-            user: auth, // Alias para compatibilidad
-            login, 
-            logout, 
+        <AuthContext.Provider value={{
+            auth,
+            user: auth,
+            login,
+            logout,
             hasRole,
             isAdmin,
             isChef,
@@ -125,8 +98,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 }
 
-export function useAuth() {
-    const ctx = useContext(AuthContext);
-    if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-    return ctx;
-}
+

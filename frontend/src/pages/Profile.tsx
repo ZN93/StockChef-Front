@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getUserProfileApi, updateProfileApi, changePasswordApi } from "../auth/api";
 import type { UpdateProfilePayload, ChangePasswordPayload } from "../auth/api";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 
 export default function Profile() {
     const navigate = useNavigate();

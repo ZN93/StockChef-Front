@@ -1,9 +1,8 @@
-import { useState } from "react";
 import SectionCard from "../ui/SectionCard.tsx";
 import { Chip } from "../ui/Chip.tsx";
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../api/client";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "../auth/useAuth";
 
 // Tipos para los datos reales de la API
 type InventorySummary = {

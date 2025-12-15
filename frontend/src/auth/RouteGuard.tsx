@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "./useAuth";
 
 export default function RouteGuard({ roles }: { roles?: Array<"USER"|"ADMIN"|"CHEF"|"EMPLOYEE"|"DEVELOPER"> }) {
     const { auth, hasRole } = useAuth();

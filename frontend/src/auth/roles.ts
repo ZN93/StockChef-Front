@@ -1,0 +1,1 @@
+export type SimpleRole = "ADMIN" | "USER" | "DEVELOPER" | "CHEF" | "EMPLOYEE";
