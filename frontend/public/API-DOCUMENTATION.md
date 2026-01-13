@@ -1847,7 +1847,7 @@ Authorization: Bearer <token>
 
 ### Déploiement
 - **Local**: `docker-compose up -d --profile postgresql --profile app`
-- **Production**: Render (https://stockchef-back.onrender.com)
+- **Production**: Railway (https://stockchef-back-production.up.railway.app)
 
 ### Base de Données
 - **PostgreSQL**: Port 5433 (Docker)

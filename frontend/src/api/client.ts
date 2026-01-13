@@ -6,7 +6,7 @@ export const apiClient = axios.create({
 });
 
 export const authApi = axios.create({
-    baseURL: import.meta.env.VITE_BACKEND_URL ?? "https://stockchef-back.onrender.com/api",
+    baseURL: import.meta.env.VITE_BACKEND_URL ?? "https://stockchef-back-production.up.railway.app/api",
 });
 
 type StoredAuth = {

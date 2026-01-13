@@ -7,7 +7,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "https://stockchef-back.onrender.com", 
+        target: "https://stockchef-back-production.up.railway.app", 
         changeOrigin: true,
         secure: true,
         rewrite: (path) => path, 
