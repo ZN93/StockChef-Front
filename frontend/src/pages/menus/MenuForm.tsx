@@ -119,8 +119,12 @@ export default function MenuForm() {
     };
 
     return (
+<<<<<<< Updated upstream
         <form onSubmit={onSubmit} className="max-w-xl space-y-4">
             {/* Titre local (le SectionCard de MenusPage a déjà son propre titre, mais ça ne gêne pas) */}
+=======
+        <form onSubmit={onSubmit} className="w-full space-y-4">
+>>>>>>> Stashed changes
             <h2 className="text-xl font-semibold">Créer un menu</h2>
 
             {/* Bandeau budget comme la maquette */}
@@ -169,12 +173,12 @@ export default function MenuForm() {
             </label>
 
             <div className="space-y-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <span className="text-sm text-gray-600">Ingrédients</span>
                     <button
                         type="button"
                         onClick={addItem}
-                        className="px-3 py-1.5 rounded-xl border text-sm bg-white hover:bg-gray-50"
+                        className="w-full sm:w-auto px-3 py-1.5 rounded-xl border text-sm bg-white hover:bg-gray-50"
                     >
                         + Ingrédient
                     </button>
@@ -190,10 +194,14 @@ export default function MenuForm() {
                     {items.map((it, idx) => (
                         <div
                             key={idx}
-                            className="grid grid-cols-12 gap-2 items-end rounded-xl bg-gray-50/60 p-3"
+                            className="grid grid-cols-1 sm:grid-cols-12 gap-2 items-end rounded-xl bg-gray-50/60 p-3"
                         >
+<<<<<<< Updated upstream
                             {/* Sélecteur produit */}
                             <label className="col-span-4 space-y-1">
+=======
+                            <label className="sm:col-span-4 col-span-1 space-y-1">
+>>>>>>> Stashed changes
                 <span className="text-xs text-gray-500">
                   Produit #{idx + 1}
                 </span>
@@ -212,21 +220,29 @@ export default function MenuForm() {
                                 </select>
                             </label>
 
+<<<<<<< Updated upstream
                             {/* Unité (auto-remplie mais éditable) */}
                             <label className="col-span-2 space-y-1">
+=======
+                            <label className="sm:col-span-2 col-span-1 space-y-1">
+>>>>>>> Stashed changes
                 <span className="text-xs text-gray-500">
                   Unité ingrédient #{idx + 1}
                 </span>
                                 <input
                                     aria-label={`Ingrédient #${idx + 1} unité`}
                                     value={it.unite}
-                                    onChange={(e) => updateItem(idx, { unite: e.target.value })}
+                                    onChange={(e) => updateItem(idx, {unite: e.target.value})}
                                     className="border rounded-xl px-2 py-1.5 w-full text-sm"
                                 />
                             </label>
+<<<<<<< Updated upstream
 
                             {/* Prix unitaire */}
                             <label className="col-span-3 space-y-1">
+=======
+                            <label className="sm:col-span-3 col-span-1 space-y-1">
+>>>>>>> Stashed changes
                 <span className="text-xs text-gray-500">
                   Prix unitaire ingrédient #{idx + 1}
                 </span>
@@ -238,14 +254,18 @@ export default function MenuForm() {
                                         Number.isFinite(it.prixUnitaire) ? it.prixUnitaire : 0
                                     }
                                     onChange={(e) =>
-                                        updateItem(idx, { prixUnitaire: Number(e.target.value) })
+                                        updateItem(idx, {prixUnitaire: Number(e.target.value)})
                                     }
                                     className="border rounded-xl px-2 py-1.5 w-full text-sm"
                                 />
                             </label>
+<<<<<<< Updated upstream
 
                             {/* Quantité */}
                             <label className="col-span-3 space-y-1">
+=======
+                            <label className="sm:col-span-3 col-span-1 space-y-1">
+>>>>>>> Stashed changes
                 <span className="text-xs text-gray-500">
                   Quantité #{idx + 1}
                 </span>
@@ -254,7 +274,7 @@ export default function MenuForm() {
                                     type="number"
                                     value={it.quantite}
                                     onChange={(e) =>
-                                        updateItem(idx, { quantite: Number(e.target.value) })
+                                        updateItem(idx, {quantite: Number(e.target.value)})
                                     }
                                     className="border rounded-xl px-2 py-1.5 w-full text-sm"
                                 />
@@ -281,7 +301,7 @@ export default function MenuForm() {
             <button
                 type="submit"
                 disabled={createMenu.isPending}
-                className="mt-1 inline-flex items-center justify-center rounded-xl bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                className="mt-1 w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-black px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
             >
                 {createMenu.isPending ? "Enregistrement…" : "Enregistrer"}
             </button>

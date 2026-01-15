@@ -27,18 +27,18 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
             <form
                 onSubmit={handleSubmit}
-                className="bg-white rounded-2xl shadow-md p-6 w-full max-w-sm space-y-4"
+                className="bg-white rounded-2xl shadow-sm sm:shadow-md p-5 sm:p-6 w-full max-w-sm space-y-4"
             >
-                <h1 className="text-xl font-semibold text-center">Connexion</h1>
+                <h1 className="text-lg sm:text-xl font-semibold text-center">Connexion</h1>
 
                 <div className="space-y-1">
                     <label className="text-sm text-gray-600">Email</label>
                     <input
                         type="email"
-                        className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring"
+                        className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring text-sm sm:text-base"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                     />
@@ -48,7 +48,7 @@ export default function LoginPage() {
                     <label className="text-sm text-gray-600">Mot de passe</label>
                     <input
                         type="password"
-                        className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring"
+                        className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring text-sm sm:text-base"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
